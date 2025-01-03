@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.swiperefreshlayout.widget.SwipeRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/scrolling"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#F3F3F3"
+    tools:context=".ui.home.HomeActivity">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <androidx.core.widget.NestedScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <ImageView
+                    android:id="@+id/profile_image"
+                    android:layout_width="33dp"
+                    android:layout_height="33dp"
+                    android:layout_marginTop="23dp"
+                    android:layout_marginEnd="23dp"
+                    android:src="@drawable/profile_dummy"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <TextView
+                    android:id="@+id/welcome"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="23dp"
+                    android:layout_marginTop="23dp"
+                    android:fontFamily="@font/figtree_medium"
+                    android:text="@string/welcome"
+                    android:textAlignment="center"
+                    android:textSize="12sp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <TextView
+                    android:id="@+id/username_tv"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="23dp"
+                    android:fontFamily="@font/figtree_bold"
+                    android:text="@string/welcome"
+                    android:textAlignment="center"
+                    android:textSize="16sp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/welcome" />
+
+                <TextView
+                    android:id="@+id/title_gamelan_rv"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="23dp"
+                    android:fontFamily="@font/figtree_regular"
+                    android:text="@string/gamelan_bali_rv"
+                    android:textAlignment="center"
+                    android:textSize="22sp"
+                    app:layout_constraintBottom_toTopOf="@+id/rv_gamelan_bali_home"
+                    app:layout_constraintStart_toStartOf="parent" />
+
+                <Button
+                    android:id="@+id/see_all_gamelan_btn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="5dp"
+                    android:backgroundTint="#F3F3F3"
+                    android:text="@string/see_all"
+                    android:textColor="#44332B"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/search_bar_gamelan" />
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rv_gamelan_bali_home"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintBottom_toTopOf="@+id/title_instrumen_rv"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent" />
+
+                <TextView
+                    android:id="@+id/title_instrumen_rv"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="23dp"
+                    android:layout_marginBottom="10dp"
+                    android:fontFamily="@font/figtree_regular"
+                    android:text="@string/instrumen_gamelan"
+                    android:textAlignment="center"
+                    android:textSize="22sp"
+                    app:layout_constraintBottom_toTopOf="@+id/rv_instrumen_home"
+                    app:layout_constraintStart_toStartOf="parent" />
+
+                <Button
+                    android:id="@+id/see_all_instrumen_btn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="13dp"
+                    android:backgroundTint="#F3F3F3"
+                    android:text="@string/see_all"
+                    android:textColor="#44332B"
+                    app:layout_constraintBottom_toTopOf="@+id/rv_instrumen_home"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/rv_gamelan_bali_home" />
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rv_instrumen_home"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginEnd="10dp"
+                    android:layout_marginBottom="17dp"
+                    android:scrollbars="vertical"
+                    app:layout_constraintBottom_toTopOf="@+id/title_sanggar_rv"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent" />
+
+                <TextView
+                    android:id="@+id/title_sanggar_rv"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="23dp"
+                    android:fontFamily="@font/figtree_regular"
+                    android:text="@string/sanggar_gamelan_bali"
+                    android:textAlignment="center"
+                    android:textSize="22sp"
+                    app:layout_constraintBottom_toTopOf="@+id/rv_sanggar_home"
+                    app:layout_constraintStart_toStartOf="parent" />
+
+                <Button
+                    android:id="@+id/see_all_sanggar_btn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="17dp"
+                    android:backgroundTint="#F3F3F3"
+                    android:text="@string/see_all"
+                    android:textColor="#44332B"
+                    app:layout_constraintBottom_toBottomOf="@+id/title_sanggar_rv"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/rv_instrumen_home" />
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rv_sanggar_home"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent" />
+
+                <com.google.android.material.search.SearchBar
+                    android:id="@+id/search_bar_gamelan"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="23dp"
+                    android:backgroundTint="#FFFFFF"
+                    android:hint="@string/search_gamelan_bali"
+                    app:layout_constraintBottom_toTopOf="@+id/title_gamelan_rv"
+                    app:layout_constraintEnd_toStartOf="@+id/search_view_gamelan"
+                    app:layout_constraintTop_toBottomOf="@+id/username_tv" />
+
+                <com.google.android.material.search.SearchView
+                    android:id="@+id/search_view_gamelan"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    app:backgroundTint="@color/white"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+        </androidx.core.widget.NestedScrollView>
+        <ProgressBar
+            android:id="@+id/progress_bar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:visibility="visible" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.swiperefreshlayout.widget.SwipeRefreshLayout>

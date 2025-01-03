@@ -1,0 +1,443 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ui.detailsanggar.DetailSanggarActivity">
+
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/scrolling"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <androidx.core.widget.NestedScrollView
+                android:id="@+id/nestedScrollView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <ImageView
+                        android:id="@+id/sanggar_image"
+                        android:layout_width="match_parent"
+                        android:layout_height="248dp"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <TextView
+                        android:id="@+id/sanggar_name"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="24dp"
+                        android:layout_marginTop="26dp"
+                        android:layout_marginEnd="24dp"
+                        android:fontFamily="@font/figtree_semi_bold"
+                        android:text="@string/nama_sanggar"
+                        android:textAlignment="center"
+                        android:textSize="22sp"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/sanggar_image" />
+
+                    <androidx.cardview.widget.CardView
+                        android:id="@+id/cardView"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:backgroundTint="#F2B38B"
+                        app:cardCornerRadius="20dp"
+                        app:cardElevation="0dp"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/sanggar_name">
+
+                        <androidx.constraintlayout.widget.ConstraintLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent">
+
+                            <ImageView
+                                android:id="@+id/phone_icon"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="17dp"
+                                android:background="@drawable/phone_detail"
+                                app:layout_constraintBottom_toBottomOf="parent"
+                                app:layout_constraintStart_toStartOf="parent"
+                                app:layout_constraintTop_toTopOf="parent" />
+
+                            <TextView
+                                android:id="@+id/phone_number"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="10dp"
+                                android:layout_marginTop="8dp"
+                                android:layout_marginEnd="20dp"
+                                android:layout_marginBottom="8dp"
+                                android:fontFamily="@font/figtree_medium"
+                                android:maxLines="1"
+                                android:text="@string/dummy_number"
+                                android:textAlignment="center"
+                                android:textColor="#43332B"
+                                android:textSize="14sp"
+                                app:layout_constraintBottom_toBottomOf="parent"
+                                app:layout_constraintEnd_toEndOf="parent"
+                                app:layout_constraintStart_toEndOf="@+id/phone_icon"
+                                app:layout_constraintTop_toTopOf="parent" />
+
+
+                        </androidx.constraintlayout.widget.ConstraintLayout>
+
+                    </androidx.cardview.widget.CardView>
+
+                    <androidx.cardview.widget.CardView
+                        android:id="@+id/materialCardView2"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="23dp"
+                        android:layout_marginTop="26dp"
+                        android:layout_marginEnd="23dp"
+                        app:cardCornerRadius="20dp"
+                        app:cardElevation="0dp"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/cardView">
+
+                        <androidx.constraintlayout.widget.ConstraintLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent">
+
+                            <TextView
+                                android:id="@+id/deskripsi_title"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="23dp"
+                                android:layout_marginTop="17dp"
+                                android:ellipsize="end"
+                                android:fontFamily="@font/figtree_bold"
+                                android:maxLines="1"
+                                android:text="@string/deskripsi"
+                                android:textAlignment="center"
+                                android:textSize="16sp"
+                                android:visibility="visible"
+                                app:layout_constraintStart_toStartOf="parent"
+                                app:layout_constraintTop_toTopOf="parent" />
+
+                            <TextView
+                                android:id="@+id/sanggar_desc"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="23dp"
+                                android:layout_marginTop="9dp"
+                                android:layout_marginEnd="23dp"
+                                android:layout_marginBottom="17dp"
+                                android:ellipsize="end"
+                                android:fontFamily="@font/figtree_medium"
+                                android:maxLines="2"
+                                android:text="@string/dummy_description"
+                                android:textSize="14sp"
+                                android:visibility="visible"
+                                app:layout_constraintBottom_toBottomOf="parent"
+                                app:layout_constraintEnd_toEndOf="parent"
+                                app:layout_constraintStart_toStartOf="parent"
+                                app:layout_constraintTop_toBottomOf="@+id/deskripsi_title" />
+
+                            <Button
+                                android:id="@+id/button_click_all"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginEnd="10dp"
+                                android:backgroundTint="#ffffff"
+                                android:drawableEnd="@drawable/buttondown"
+                                android:visibility="visible"
+                                app:layout_constraintEnd_toEndOf="parent"
+                                app:layout_constraintTop_toTopOf="parent" />
+
+                            <TextView
+                                android:id="@+id/sanggar_desc_full"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="23dp"
+                                android:layout_marginTop="9dp"
+                                android:layout_marginEnd="23dp"
+                                android:layout_marginBottom="17dp"
+                                android:fontFamily="@font/figtree_medium"
+                                android:text="@string/dummy_description"
+                                android:textSize="14sp"
+                                android:visibility="gone"
+                                app:layout_constraintBottom_toBottomOf="parent"
+                                app:layout_constraintEnd_toEndOf="parent"
+                                app:layout_constraintStart_toStartOf="parent"
+                                app:layout_constraintTop_toBottomOf="@+id/deskripsi_title" />
+
+                            <Button
+                                android:id="@+id/button_click_down"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginEnd="10dp"
+                                android:backgroundTint="#ffffff"
+                                android:drawableEnd="@drawable/buttonup"
+                                android:visibility="gone"
+                                app:layout_constraintEnd_toEndOf="parent"
+                                app:layout_constraintTop_toTopOf="parent" />
+
+                        </androidx.constraintlayout.widget.ConstraintLayout>
+
+                    </androidx.cardview.widget.CardView>
+
+                    <androidx.cardview.widget.CardView
+                        android:id="@+id/materialCardView3"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="23dp"
+                        android:layout_marginTop="17dp"
+                        android:layout_marginEnd="23dp"
+                        android:layout_marginBottom="26dp"
+                        app:cardCornerRadius="20dp"
+                        app:cardElevation="0dp"
+                        app:layout_constraintBottom_toTopOf="@+id/title_gamelan_rv"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/materialCardView2">
+
+                        <androidx.constraintlayout.widget.ConstraintLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent">
+
+                            <TextView
+                                android:id="@+id/alamat_title"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="23dp"
+                                android:layout_marginTop="17dp"
+                                android:ellipsize="end"
+                                android:fontFamily="@font/figtree_bold"
+                                android:maxLines="1"
+                                android:text="@string/alamat"
+                                android:textAlignment="center"
+                                android:textSize="16sp"
+                                android:visibility="visible"
+                                app:layout_constraintStart_toStartOf="parent"
+                                app:layout_constraintTop_toTopOf="parent" />
+
+                            <TextView
+                                android:id="@+id/alamat_desc"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="23dp"
+                                android:layout_marginTop="9dp"
+                                android:layout_marginEnd="23dp"
+                                android:layout_marginBottom="17dp"
+                                android:fontFamily="@font/figtree_medium"
+                                android:text="@string/dummy_description"
+                                android:textSize="14sp"
+                                android:visibility="visible"
+                                app:layout_constraintBottom_toBottomOf="parent"
+                                app:layout_constraintEnd_toEndOf="parent"
+                                app:layout_constraintStart_toStartOf="parent"
+                                app:layout_constraintTop_toBottomOf="@+id/alamat_title" />
+
+
+                        </androidx.constraintlayout.widget.ConstraintLayout>
+
+                    </androidx.cardview.widget.CardView>
+
+                    <TextView
+                        android:id="@+id/title_gamelan_rv"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="23dp"
+                        android:fontFamily="@font/figtree_regular"
+                        android:text="@string/gamelan_bali_rv"
+                        android:textAlignment="center"
+                        android:textSize="22sp"
+                        app:layout_constraintBottom_toTopOf="@+id/rv_gamelan_bali_home"
+                        app:layout_constraintStart_toStartOf="parent" />
+
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/rv_gamelan_bali_home"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="17dp"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+            </androidx.core.widget.NestedScrollView>
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/show_everything_card"
+                android:layout_width="65dp"
+                android:layout_height="65dp"
+                android:layout_marginEnd="23dp"
+                android:layout_marginBottom="23dp"
+                android:backgroundTint="#F2B38B"
+                app:cardCornerRadius="50dp"
+                app:cardElevation="15dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent">
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:backgroundTint="#F2B38B">
+
+                    <Button
+                        android:id="@+id/show_everything"
+                        android:layout_width="0dp"
+                        android:layout_height="0dp"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <ImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="10dp"
+                        android:layout_marginTop="10dp"
+                        android:layout_marginEnd="10dp"
+                        android:layout_marginBottom="10dp"
+                        android:src="@drawable/menu"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+            </androidx.cardview.widget.CardView>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/deletebtn"
+                style="@style/CustomElevatedButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="23dp"
+                android:layout_marginBottom="18dp"
+                android:backgroundTint="#f72323"
+                android:fontFamily="@font/figtree_semi_bold"
+                android:padding="15dp"
+                android:paddingStart="20dp"
+                android:paddingEnd="20dp"
+                android:text="@string/hapus_sanggar"
+                android:textColor="@color/white"
+                android:textSize="14sp"
+                android:visibility="gone"
+                app:cornerRadius="10dp"
+                app:layout_constraintBottom_toTopOf="@+id/editdatacard"
+                app:layout_constraintEnd_toEndOf="parent" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/editdatacard"
+                style="@style/CustomElevatedButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="23dp"
+                android:layout_marginBottom="23dp"
+                android:focusable="true"
+                android:fontFamily="@font/figtree_semi_bold"
+                android:padding="15dp"
+                android:paddingStart="20dp"
+                android:paddingEnd="20dp"
+                android:backgroundTint="@color/colorPrimary"
+                android:text="@string/edit_sanggar"
+                android:textColor="#44332B"
+                android:textSize="14sp"
+                android:visibility="gone"
+                app:backgroundTint="#F2B38B"
+                android:clickable="true"
+                app:cornerRadius="10dp"
+                app:layout_constraintBottom_toTopOf="@+id/calls"
+                app:layout_constraintEnd_toEndOf="parent" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/gotomaps"
+                style="@style/CustomElevatedButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="23dp"
+                android:layout_marginBottom="23dp"
+                android:drawableLeft="@drawable/location_icon"
+                android:fontFamily="@font/figtree_semi_bold"
+                android:padding="15dp"
+                android:paddingStart="20dp"
+                android:paddingEnd="20dp"
+                android:backgroundTint="@color/colorPrimary"
+                android:text="@string/lihat_lokasi"
+                android:textColor="#44332B"
+                android:textSize="14sp"
+                app:cornerRadius="10dp"
+                android:visibility="gone"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/show_everything_card" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/calls"
+                style="@style/CustomElevatedButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="23dp"
+                android:layout_marginBottom="23dp"
+                android:drawableLeft="@drawable/phone_detail"
+                android:fontFamily="@font/figtree_semi_bold"
+                android:padding="15dp"
+                android:paddingStart="20dp"
+                android:paddingEnd="20dp"
+                android:backgroundTint="@color/colorPrimary"
+                android:text="@string/telepon"
+                android:textColor="#44332B"
+                android:textSize="14sp"
+                app:cornerRadius="10dp"
+                android:visibility="gone"
+                app:layout_constraintBottom_toTopOf="@+id/show_everything_card"
+                app:layout_constraintEnd_toEndOf="parent" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/chats"
+                style="@style/CustomElevatedButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="18dp"
+                android:layout_marginBottom="16dp"
+                android:drawableLeft="@drawable/chat_icon"
+                android:fontFamily="@font/figtree_semi_bold"
+                android:padding="15dp"
+                android:paddingStart="20dp"
+                android:paddingEnd="20dp"
+                android:backgroundTint="@color/colorPrimary"
+                android:text="@string/whatsapp"
+                android:textColor="#44332B"
+                android:textSize="14sp"
+                android:visibility="gone"
+                app:cornerRadius="10dp"
+                app:layout_constraintBottom_toTopOf="@+id/gotomaps"
+                app:layout_constraintEnd_toStartOf="@+id/editdatacard" />
+
+            <ProgressBar
+                android:id="@+id/progress_bar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:visibility="visible" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

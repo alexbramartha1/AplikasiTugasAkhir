@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <!--
+ Required only if your app needs to access audio files
+         that other apps created.
+    -->
+    <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
+    <uses-permission
+        android:name="android.permission.READ_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32" />
+    <uses-permission
+        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="29"
+        tools:ignore="ScopedStorage" />
+
+    <application
+        android:name=".SharedData"
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme">
+        <activity
+            android:name=".ui.inputgamelan.InputAudioGamelanActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.inputgamelan.InputGamelanActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.inputinstrument.InputAudioInstrumentActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.inputinstrument.InputInstrumentActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.inputsanggar.InputDataSanggarActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.seeallsanggar.SeeAllSanggarActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.seeallgamelan.SeeAllGamelanBaliActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.seeallinstrument.DetailSeeAllInstrumentActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.detailsanggar.DetailSanggarActivity"
+            android:exported="false"
+            android:parentActivityName=".ui.home.HomeActivity" />
+        <activity
+            android:name=".ui.detailinstrument.DetailInstrumentActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.detailgamelan.DetailGamelanActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.home.HomeActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.login.LoginActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".ui.regsiter.RegisterActivity"
+            android:exported="false" />
+        <activity
+            android:name=".MainActivity"
+            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
+            android:exported="false"
+            android:screenOrientation="fullSensor" />
+
+        <service
+            android:name="com.google.android.gms.metadata.ModuleDependencies"
+            android:enabled="false"
+            android:exported="false"
+            tools:ignore="MissingClass">
+            <intent-filter>
+                <action android:name="com.google.android.gms.metadata.MODULE_DEPENDENCIES" />
+            </intent-filter>
+
+            <meta-data
+                android:name="photopicker_activity:0:required"
+                android:value="" />
+        </service>
+    </application>
+
+</manifest>
