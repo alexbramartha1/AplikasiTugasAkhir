@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.view.MotionEvent
 import android.view.View
 import android.widget.ArrayAdapter
 import android.widget.Button
@@ -59,6 +60,7 @@ class InputGamelanActivity : AppCompatActivity() {
     private var deskripsiGamelanBefore: String? = null
 
 
+    @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityInputGamelanBinding.inflate(layoutInflater)
@@ -77,6 +79,16 @@ class InputGamelanActivity : AppCompatActivity() {
             }
 
             idGamelan = intent.getStringExtra(IDGAMELAN)
+
+            binding.edDeskripsiGamelan.setOnTouchListener { v, event ->
+                if (v.id == R.id.ed_deskripsi_gamelan) {
+                    v.parent.requestDisallowInterceptTouchEvent(true)
+                    when (event.action and MotionEvent.ACTION_MASK) {
+                        MotionEvent.ACTION_UP -> v.parent.requestDisallowInterceptTouchEvent(false)
+                    }
+                }
+                false
+            }
 
             inputGamelanBaliViewModel.fetchGolonganGamelan().observe(this@InputGamelanActivity) { result ->
                 if (result != null) {
@@ -157,6 +169,8 @@ class InputGamelanActivity : AppCompatActivity() {
                                     binding.inputInstrumentId.setText(R.string.pilih_instrument_gamelan)
                                 }
 
+                                binding.uploadGamelan.text = "Simpan dan Edit Audio"
+
                                 result.data.gamelanData[0].upacara.forEach {
                                     upacaraInputList.add(it)
                                     upacaraListBefore.add(it)
@@ -215,7 +229,7 @@ class InputGamelanActivity : AppCompatActivity() {
 
                 val dialog = builder.create()
                 dialog.show()
-                headerView.setText(R.string.pilih_gamelan)
+                headerView.setText(R.string.pilih_golongan)
                 buttonPilih.setOnClickListener {
                     val selectedPosition = listView.checkedItemPosition
                     binding.inputGolongan.text = adapter.getItem(selectedPosition)
@@ -287,7 +301,7 @@ class InputGamelanActivity : AppCompatActivity() {
                 val buttonBatal: Button = dialogView.findViewById(R.id.batalkabbtn)
                 val headerView: TextView = dialogView.findViewById(R.id.title_alamat)
 
-                val adapter = ArrayAdapter(this@InputGamelanActivity, android.R.layout.simple_list_item_single_choice, instrumentNameList)
+                val adapter = ArrayAdapter(this@InputGamelanActivity, android.R.layout.simple_list_item_multiple_choice, instrumentNameList)
                 listView.adapter = adapter
 
                 listView.choiceMode = ListView.CHOICE_MODE_MULTIPLE

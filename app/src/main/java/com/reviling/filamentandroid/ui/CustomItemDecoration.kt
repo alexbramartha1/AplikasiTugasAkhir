@@ -53,6 +53,30 @@ class CustomItemDecorationVertical(
     }
 }
 
+
+class CustomItemDecorationVerticalDouble(
+    private val marginRight: Int,
+    private val includeEdge: Boolean
+) : RecyclerView.ItemDecoration() {
+
+    override fun getItemOffsets(
+        outRect: Rect,
+        view: View,
+        parent: RecyclerView,
+        state: RecyclerView.State
+    ) {
+        val position = parent.getChildAdapterPosition(view)
+        val itemCount = state.itemCount
+        Log.d("IsidariItemCount", itemCount.toString())
+        // Tambahkan margin kanan hanya untuk item terakhir
+        if (position == itemCount - 1 || position == itemCount - 2) {
+            outRect.bottom = marginRight  // atau nilai margin yang sesuai
+        } else {
+            outRect.bottom = 0 // Tidak ada margin untuk item lainnya
+        }
+    }
+}
+
 class CustomItemDecorationAbove(
     private val marginRight: Int,
     private val includeEdge: Boolean

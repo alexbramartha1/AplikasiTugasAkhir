@@ -50,7 +50,7 @@
             android:id="@+id/image_edit"
             android:layout_width="159dp"
             android:layout_height="159dp"
-            android:layout_marginTop="40dp"
+            android:layout_marginTop="50dp"
             android:src="@drawable/profile_page_image"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -92,6 +92,32 @@
 
         </androidx.cardview.widget.CardView>
 
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/seeDoc"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:backgroundTint="@color/colorPrimary"
+            android:drawableLeft="@drawable/doc_icon"
+            android:text="@string/lihat_dokumen"
+            android:visibility="gone"
+            android:textColor="@color/colorPrimaryDark"
+            app:cornerRadius="7dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/email_pengguna" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/editDoc"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:drawableLeft="@drawable/pencil_icon"
+            android:backgroundTint="@color/white"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="@+id/seeDoc"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/seeDoc" />
+
         <TextView
             android:id="@+id/username_edit"
             android:layout_width="0dp"
@@ -125,11 +151,43 @@
             app:layout_constraintTop_toBottomOf="@+id/username_edit" />
 
         <com.google.android.material.button.MaterialButton
+            android:id="@+id/status"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="58dp"
+            android:layout_marginTop="50dp"
+            android:layout_marginEnd="58dp"
+            android:backgroundTint="#F3F3F3"
+            android:fontFamily="@font/figtree_semi_bold"
+            android:padding="15dp"
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp"
+            android:text="@string/status"
+            android:textColor="@color/colorPrimaryDark"
+            android:textSize="14sp"
+            app:cornerRadius="10dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/seeDoc" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/refreshBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="7dp"
+            android:drawableRight="@drawable/info_icon"
+            android:backgroundTint="@android:color/transparent"
+            app:cornerRadius="10dp"
+            app:layout_constraintBottom_toBottomOf="@+id/status"
+            app:layout_constraintEnd_toEndOf="@+id/status"
+            app:layout_constraintTop_toTopOf="@+id/status" />
+
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/logoutbutton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="58dp"
-            android:layout_marginTop="67dp"
+            android:layout_marginTop="8dp"
             android:layout_marginEnd="58dp"
             android:layout_marginBottom="50dp"
             android:backgroundTint="#F3F3F3"
@@ -144,7 +202,8 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/email_pengguna" />
+            app:layout_constraintTop_toBottomOf="@+id/status" />
+
         <ProgressBar
             android:id="@+id/progress_bar_profile"
             android:layout_width="wrap_content"

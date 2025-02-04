@@ -13,6 +13,7 @@ class DetailSanggarViewModel(private val repositoryData: RepositoryData): ViewMo
     fun getSessionUser(): LiveData<UserModel> {
         return repositoryData.getSession().asLiveData()
     }
-
+    fun getNoteData(id: String) = repositoryData.getNoteData(id)
+    fun getListStatus() = repositoryData.getListStatus()
     fun getGamelanByIdList(idList: MutableList<String>) = repositoryData.getGamelanByIdList(idList)
 }

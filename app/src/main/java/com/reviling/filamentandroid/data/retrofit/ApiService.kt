@@ -11,6 +11,7 @@ import com.reviling.filamentandroid.data.response.FetchGamelanAudioResponse
 import com.reviling.filamentandroid.data.response.FetchGolonganListResponse
 import com.reviling.filamentandroid.data.response.FetchInstrumentAudioResponse
 import com.reviling.filamentandroid.data.response.FetchRoleResponse
+import com.reviling.filamentandroid.data.response.FetchStatusResponse
 import com.reviling.filamentandroid.data.response.FullAlamatDataResponse
 import com.reviling.filamentandroid.data.response.GetGamelanBaliResponse
 import com.reviling.filamentandroid.data.response.GetInstrumentBaliResponse
@@ -20,6 +21,7 @@ import com.reviling.filamentandroid.data.response.GetUserDataResponse
 import com.reviling.filamentandroid.data.response.KabupatenListResponse
 import com.reviling.filamentandroid.data.response.KecamatanListResponse
 import com.reviling.filamentandroid.data.response.LoginUserResponse
+import com.reviling.filamentandroid.data.response.NoteAdminResponse
 import com.reviling.filamentandroid.data.response.UpdateDataAudioInstrumentResponse
 import com.reviling.filamentandroid.data.response.UpdateDataInstrumenResponse
 import com.reviling.filamentandroid.data.response.UpdateDataSanggarResponse
@@ -50,7 +52,8 @@ interface ApiService {
         @Part("nama") nama: RequestBody,
         @Part("email") email: RequestBody,
         @Part("password") password: RequestBody,
-        @Part("role_input") role: RequestBody
+        @Part("role_input") role: RequestBody,
+        @Part supportDocument: MultipartBody.Part?
     ): GetUserDataResponse
 
     @FormUrlEncoded
@@ -118,7 +121,8 @@ interface ApiService {
         @Part("kode_pos") kodePost: RequestBody,
         @Part("deskripsi") deskripsi: RequestBody,
         @Part("id_desa") idDesa: RequestBody,
-        @Part("gamelan_id") gamelanlist: MutableList<String>
+        @Part("gamelan_id") gamelanlist: MutableList<String>,
+        @Part supportDocument: MultipartBody.Part
     ): CreateDataSanggarResponse
 
     @Multipart
@@ -132,7 +136,8 @@ interface ApiService {
         @Part("kode_pos") kodePost: RequestBody?,
         @Part("deskripsi") deskripsi: RequestBody?,
         @Part("id_desa") idDesa: RequestBody?,
-        @Part("gamelan_id") gamelanlist: MutableList<String>?
+        @Part("gamelan_id") gamelanlist: MutableList<String>?,
+        @Part supportDocument: MultipartBody.Part?
     ): UpdateDataSanggarResponse
 
     @GET("api/gamelanbali/fetchall")
@@ -166,6 +171,13 @@ interface ApiService {
     suspend fun updateUsername(
         @Path("id") id: String,
         @Part("nama") nama: RequestBody
+    ): UpdateUsernameResponse
+
+    @Multipart
+    @PUT("api/userdata/updateprofile/{id}")
+    suspend fun updateDocument(
+        @Path("id") id: String,
+        @Part supportDocument: MultipartBody.Part
     ): UpdateUsernameResponse
 
     @GET("api/getkabupaten/all")
@@ -318,4 +330,31 @@ interface ApiService {
     @GET("api/fetchinstrument/onlynameandid")
     suspend fun fetchInstrumentOnlyNamesId(): GetInstrumentBaliResponse
 
+    @GET("api/getallstatus/liststatus")
+    suspend fun fetchStatusList(): FetchStatusResponse
+
+    @Multipart
+    @POST("api/gamelanbali/fetch/byfilter")
+    suspend fun getGamelanDataByFilter(
+        @Part("statusId") statusId: List<String>,
+        @Part("golonganId") golonganId: List<String>
+    ): GetGamelanBaliResponse
+
+    @Multipart
+    @POST("api/instrumendata/fetch/byfilter")
+    suspend fun getInstrumentByFilter(
+        @Part("statusId") statusId: List<String>
+    ): GetInstrumentBaliResponse
+
+    @Multipart
+    @POST("api/sanggardata/fetch/byfilter/{id}")
+    suspend fun getSanggarByFilter(
+        @Path("id") id: String,
+        @Part("statusId") statusId: List<String>
+    ): GetSanggarBaliResponse
+
+    @GET("api/fetch/noteadmin/{id}")
+    suspend fun getNoteData(
+        @Path("id") id: String
+    ): NoteAdminResponse
 }

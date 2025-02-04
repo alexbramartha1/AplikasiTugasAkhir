@@ -11,7 +11,7 @@
     <string name="let_s_learn_gamelan_bali">Let’s learn Gamelan Bali!</string>
     <string name="register_to_create_account">Register to create account</string>
     <string name="input_your_username">Input your username</string>
-    <string name="username">Username</string>
+    <string name="username">Full Name</string>
     <string name="email">Email</string>
     <string name="input_your_email">Input your email</string>
     <string name="password">Password</string>
@@ -36,6 +36,8 @@
     <string name="sanggar_gamelan_bali">Sanggar Gamelan Bali</string>
     <string name="error_message_connection">Kesalahan koneksi, cek koneksimu!</string>
     <string name="cannot_empty">Tidak boleh kosong!</string>
+    <string name="image_cannot_empty">Gambar sanggar harus diisi!</string>
+    <string name="format_phone">Format: +6287714504894</string>
     <string name="material_cannot_empty">Mohon isi Material!</string>
     <string name="role_cannot_empty">Mohon isi Role!</string>
     <string name="cannot_field">Alamat tidak boleh kosong!</string>
@@ -84,6 +86,7 @@
     <string name="logout">Logout</string>
     <string name="option_1">Option 1</string>
     <string name="pilih_kabupaten">Pilih Kabupaten</string>
+    <string name="kabupaten_added">Kabupaten Dipilih</string>
     <string name="pilih">Pilih</string>
     <string name="pilih_kecamatan">Pilih Kecamatan</string>
     <string name="pilih_desa">Pilih Desa</string>
@@ -128,4 +131,13 @@
     <string name="deskripsi_audio">Deskripsi Audio</string>
     <string name="upload_tabuh_gamelan">Upload Tabuh Gamelan</string>
     <string name="tambahkan_tabuh_gamelan">+ Tambahkan Tabuh Gamelan</string>
+    <string name="status">Status</string>
+    <string name="filter">Filter</string>
+    <string name="gunakan_filter">Gunakan Filter</string>
+    <string name="clear_filter">Clear Filter</string>
+    <string name="upload_file_pendukung">Upload File Bukti</string>
+    <string name="file_selected">File Selected!</string>
+    <string name="upload_bukti_kepemilikan">Upload Bukti Kepemilikan</string>
+    <string name="sertifikat">Lihat Sertifikat</string>
+    <string name="lihat_dokumen">Dokumen</string>
 </resources>

@@ -41,5 +41,8 @@ data class UserGetByIdResponse(
 	val updatedAt: String,
 
 	@field:SerializedName("status_id")
-	val status: String
+	val status: String,
+
+	@field:SerializedName("support_document")
+	val supportDocument: String
 )

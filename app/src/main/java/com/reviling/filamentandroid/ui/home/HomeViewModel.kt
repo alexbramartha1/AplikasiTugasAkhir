@@ -23,12 +23,14 @@ class HomeViewModel(private val repository: RepositoryData): ViewModel() {
 
     fun updateUsername(id: String, username: String) = repository.updateUsername(id, username)
 
+    fun updateDocumenet(id: String, document: File) = repository.updateDocumentUser(id, document)
+
     fun getSessionUser(): LiveData<UserModel> {
         return repository.getSession().asLiveData()
     }
     fun getAllRoleList() = repository.getRoleList()
     fun uploadPhotoUser(id: String, files: File) = repository.uploadPhotoUser(id, files)
-
+    fun getListStatus() = repository.getListStatus()
     fun saveSession(userModel: UserModel) {
         viewModelScope.launch {
             repository.saveSession(userModel)

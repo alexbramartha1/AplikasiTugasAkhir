@@ -286,8 +286,10 @@
                         android:layout_marginBottom="16dp"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintHorizontal_bias="0.0"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@+id/title_instrumen_rv" />
+                        app:layout_constraintTop_toBottomOf="@+id/title_instrumen_rv"
+                        app:layout_constraintVertical_bias="0.0" />
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -303,9 +305,25 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 tools:visibility="visible" />
+
         </androidx.constraintlayout.widget.ConstraintLayout>
 
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/statusBtn"
+        style="@style/CustomElevatedButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="23dp"
+        android:layout_marginBottom="23dp"
+        android:drawableLeft="@drawable/info_icon"
+        android:backgroundTint="@color/colorPrimary"
+        android:text="@string/status"
+        android:textColor="@color/colorPrimaryDark"
+        app:cornerRadius="4dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <androidx.cardview.widget.CardView
         android:id="@+id/show_everything_card"
@@ -350,46 +368,66 @@
 
     </androidx.cardview.widget.CardView>
 
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/deletebtn"
-        style="@style/CustomElevatedButton"
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cardViewButtonGroup"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="23dp"
         android:layout_marginBottom="18dp"
-        android:backgroundTint="#f72323"
-        android:fontFamily="@font/figtree_semi_bold"
-        android:padding="15dp"
-        android:paddingStart="20dp"
-        android:paddingEnd="20dp"
-        android:text="@string/hapus_gamelan"
-        android:textColor="@color/white"
-        android:textSize="14sp"
-        android:visibility="gone"
-        app:cornerRadius="10dp"
-        app:layout_constraintBottom_toTopOf="@+id/editdatacard"
-        app:layout_constraintEnd_toEndOf="parent" />
-
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/editdatacard"
-        style="@style/CustomElevatedButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="23dp"
-        android:clickable="true"
-        android:focusable="true"
-        android:fontFamily="@font/figtree_semi_bold"
-        android:padding="15dp"
-        android:paddingStart="20dp"
-        android:paddingEnd="20dp"
-        android:layout_marginBottom="18dp"
-        android:text="@string/edit_gamelan_bali"
-        android:textColor="#44332B"
-        android:textSize="14sp"
-        android:visibility="gone"
-        app:backgroundTint="#F2B38B"
-        app:cornerRadius="10dp"
+        android:backgroundTint="@color/colorPrimary"
+        app:cardCornerRadius="10dp"
+        app:cardElevation="15dp"
+        android:clipChildren="false"
+        android:clipToPadding="false"
         app:layout_constraintBottom_toTopOf="@+id/show_everything_card"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/deletebtn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:drawableLeft="@drawable/delete_icon"
+                android:fontFamily="@font/figtree_semi_bold"
+                android:gravity="start"
+                android:padding="15dp"
+                android:paddingStart="30dp"
+                android:paddingEnd="30dp"
+                android:text="@string/hapus_gamelan"
+                android:textColor="@color/colorPrimaryDark"
+                android:textSize="14sp"
+                android:visibility="gone"
+                app:cornerRadius="0dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_goneMarginTop="0dp"
+                app:layout_constraintBottom_toTopOf="@+id/editdatacard"/>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/editdatacard"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:drawableLeft="@drawable/pencil_icon_large"
+                android:fontFamily="@font/figtree_semi_bold"
+                android:gravity="start"
+                android:padding="15dp"
+                android:paddingStart="30dp"
+                android:paddingEnd="30dp"
+                android:text="@string/edit_gamelan_bali"
+                android:visibility="gone"
+                android:textColor="@color/colorPrimaryDark"
+                android:textSize="14sp"
+                app:cornerRadius="0dp"
+                app:layout_goneMarginTop="0dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"/>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.cardview.widget.CardView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

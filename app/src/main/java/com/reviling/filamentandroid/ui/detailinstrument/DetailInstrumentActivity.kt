@@ -8,6 +8,7 @@ import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.ProgressBar
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AlertDialog
@@ -20,12 +21,16 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.CenterCrop
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
+import com.google.android.material.bottomsheet.BottomSheetDialog
+import com.google.android.material.button.MaterialButton
 import com.reviling.filamentandroid.MainActivity
 import com.reviling.filamentandroid.R
 import com.reviling.filamentandroid.ViewModelFactory
 import com.reviling.filamentandroid.data.Result
+import com.reviling.filamentandroid.data.preferences.UserModel
 import com.reviling.filamentandroid.data.response.AudioInstrumenItem
 import com.reviling.filamentandroid.databinding.ActivityDetailInstrumentBinding
+import com.reviling.filamentandroid.ui.BaseActivity
 import com.reviling.filamentandroid.ui.CustomItemDecoration
 import com.reviling.filamentandroid.ui.adapter.AudioInstrumentAdapter
 import com.reviling.filamentandroid.ui.adapter.GamelanAdapter
@@ -37,7 +42,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class DetailInstrumentActivity : AppCompatActivity() {
+class DetailInstrumentActivity : BaseActivity() {
 
     private lateinit var binding: ActivityDetailInstrumentBinding
     private lateinit var detailInstrumentViewModel: DetailInstrumentViewModel
@@ -48,6 +53,7 @@ class DetailInstrumentActivity : AppCompatActivity() {
     private var flagsBtnShow: Int = 0
     private var audioIdList: MutableList<String> = mutableListOf()
     private lateinit var isLoadingBar: ProgressBar
+    private var statusDetail: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -70,6 +76,16 @@ class DetailInstrumentActivity : AppCompatActivity() {
                     DetailInstrumentViewModel::class.java)
             }
 
+            detailInstrumentViewModel.getSessionUser().observe(this@DetailInstrumentActivity) { user ->
+                if (user.role == "67619109cc4fa7bc6c0bdbc8" && user.status == "67618fc3cc4fa7bc6c0bdbbf") {
+                    binding.showEverythingCard.visibility = View.VISIBLE
+                    binding.statusBtn.visibility = View.VISIBLE
+                } else {
+                    binding.showEverythingCard.visibility = View.GONE
+                    binding.statusBtn.visibility = View.GONE
+                }
+            }
+
             binding.showEverything.setOnClickListener {
                 if (flagsBtnShow == 0) {
                     flagsBtnShow = 1
@@ -82,6 +98,50 @@ class DetailInstrumentActivity : AppCompatActivity() {
                 }
             }
 
+            binding.statusBtn.setOnClickListener {
+                val dialog = layoutInflater.inflate(R.layout.status_fragment, null)
+                val builder = BottomSheetDialog(this@DetailInstrumentActivity)
+                val descriptionStatus: TextView = dialog.findViewById(R.id.status_description)
+                val statusApproval: MaterialButton = dialog.findViewById(R.id.status_approval)
+                isLoadingBar = dialog.findViewById(R.id.progress_bar_dialog_ask)
+
+                builder.setContentView(dialog)
+                builder.show()
+
+                detailInstrumentViewModel.getNoteData(idInstrument).observe(this@DetailInstrumentActivity) { result ->
+                    if (result != null) {
+                        when (result) {
+                            is Result.Loading -> {
+                                isLoadingBar.visibility = View.VISIBLE
+                            }
+
+                            is Result.Success -> {
+                                descriptionStatus.visibility = View.VISIBLE
+                                descriptionStatus.text = result.data.note
+                                statusApproval.text = statusDetail
+
+                                if (statusDetail == "Pending") {
+                                    statusApproval.setTextColor(getColor(R.color.white))
+                                    statusApproval.setBackgroundColor(getColor(R.color.pendingColor))
+                                } else if (statusDetail == "Unapproved") {
+                                    statusApproval.setTextColor(getColor(R.color.white))
+                                    statusApproval.setBackgroundColor(getColor(R.color.unapprovedColor))
+                                } else if (statusDetail == "Approved") {
+                                    statusApproval.setTextColor(getColor(R.color.white))
+                                    statusApproval.setBackgroundColor(getColor(R.color.approvedColor))
+                                }
+                                isLoadingBar.visibility = View.GONE
+                            }
+
+                            is Result.Error -> {
+                                showToast(result.error)
+                                isLoadingBar.visibility = View.GONE
+                            }
+                        }
+                    }
+                }
+            }
+
             detailInstrumentViewModel.getDetailInstrumentById(idInstrument).observe(this@DetailInstrumentActivity) { result ->
                 if (result != null) {
                     when (result) {
@@ -90,9 +150,48 @@ class DetailInstrumentActivity : AppCompatActivity() {
                         }
 
                         is Result.Success -> {
-                            showToast("Data Loaded")
-                            isLoading(false)
+
                             Log.d("ISIDATA", result.data.toString())
+
+                            detailInstrumentViewModel.getListStatus().observe(this@DetailInstrumentActivity) { status ->
+                                if (status != null) {
+                                    when (status) {
+                                        is Result.Loading -> {
+                                            isLoading(true)
+                                        }
+
+                                        is Result.Success -> {
+                                            val statusSanggar = result.data.instrumentData[0].status
+
+                                            status.data?.forEach {
+                                                if (it?.id == statusSanggar) {
+                                                    binding.statusBtn.text = it.status
+                                                    statusDetail = it.status
+
+                                                    if (it.status == "Pending") {
+                                                        binding.statusBtn.setTextColor(getColor(R.color.white))
+                                                        binding.statusBtn.setBackgroundColor(getColor(R.color.pendingColor))
+                                                    } else if (it.status == "Unapproved") {
+                                                        binding.statusBtn.setTextColor(getColor(R.color.white))
+                                                        binding.statusBtn.setBackgroundColor(getColor(R.color.unapprovedColor))
+                                                    } else if (it.status == "Approved") {
+                                                        binding.statusBtn.setTextColor(getColor(R.color.white))
+                                                        binding.statusBtn.setBackgroundColor(getColor(R.color.approvedColor))
+                                                    }
+                                                }
+                                            }
+
+                                            showToast("Data Loaded")
+                                            isLoading(false)
+                                        }
+
+                                        is Result.Error -> {
+                                            showToast(status.error)
+                                            isLoading(false)
+                                        }
+                                    }
+                                }
+                            }
 
                             binding.deletebtn.setOnClickListener {
                                 val builder = AlertDialog.Builder(this@DetailInstrumentActivity)
@@ -213,6 +312,7 @@ class DetailInstrumentActivity : AppCompatActivity() {
                             binding.tridiView.setOnClickListener {
                                 val intent = Intent(this@DetailInstrumentActivity, MainActivity::class.java)
                                 intent.putExtra(MainActivity.URL, result.data.instrumentData[0].tridImage)
+                                intent.putExtra(MainActivity.IDTRIDI, result.data.instrumentData[0].id)
                                 if (result.data.instrumentData[0].imageInstrumen.isNotEmpty() && result.data.instrumentData[0].imageInstrumen.size > 1) {
                                     intent.putExtra(MainActivity.IMAGE, result.data.instrumentData[0].imageInstrumen[1])
                                 }
@@ -253,6 +353,8 @@ class DetailInstrumentActivity : AppCompatActivity() {
                             binding.rvAudio.setHasFixedSize(true)
                             binding.rvAudio.adapter = audioInstrumentAdapter
                             audioInstrumentAdapter.setListAudioInstrument(result.data.instrumentData[0].audioInstrumen)
+                            showToast("Data Loaded")
+                            isLoading(false)
                         }
 
                         is Result.Error -> {
@@ -271,8 +373,6 @@ class DetailInstrumentActivity : AppCompatActivity() {
                         }
 
                         is Result.Success -> {
-                            showToast("Data Loaded")
-                            isLoading(false)
                             Log.d("ISIDATA", result.data.toString())
 
                             adapter = GamelanAdapter(this@DetailInstrumentActivity)
@@ -281,6 +381,8 @@ class DetailInstrumentActivity : AppCompatActivity() {
                             binding.rvGamelanBaliHome.adapter = adapter
 
                             adapter.setListGamelan(result.data.gamelanData)
+                            showToast("Data Loaded")
+                            isLoading(false)
                         }
 
                         is Result.Error -> {
@@ -302,8 +404,46 @@ class DetailInstrumentActivity : AppCompatActivity() {
                         }
 
                         is Result.Success -> {
-                            showToast("Data Loaded")
-                            isLoading(false)
+
+                            detailInstrumentViewModel.getListStatus().observe(this@DetailInstrumentActivity) { status ->
+                                if (status != null) {
+                                    when (status) {
+                                        is Result.Loading -> {
+                                            isLoading(true)
+                                        }
+
+                                        is Result.Success -> {
+                                            val statusSanggar = result.data.instrumentData[0].status
+
+                                            status.data?.forEach {
+                                                if (it?.id == statusSanggar) {
+                                                    binding.statusBtn.text = it.status
+
+                                                    if (it.status == "Pending") {
+                                                        binding.statusBtn.setTextColor(getColor(R.color.white))
+                                                        binding.statusBtn.setBackgroundColor(getColor(R.color.pendingColor))
+                                                    } else if (it.status == "Unapproved") {
+                                                        binding.statusBtn.setTextColor(getColor(R.color.white))
+                                                        binding.statusBtn.setBackgroundColor(getColor(R.color.unapprovedColor))
+                                                    } else if (it.status == "Approved") {
+                                                        binding.statusBtn.setTextColor(getColor(R.color.white))
+                                                        binding.statusBtn.setBackgroundColor(getColor(R.color.approvedColor))
+                                                    }
+                                                }
+                                            }
+
+                                            showToast("Data Loaded")
+                                            isLoading(false)
+                                        }
+
+                                        is Result.Error -> {
+                                            showToast(status.error)
+                                            isLoading(false)
+                                        }
+                                    }
+                                }
+                            }
+
                             Log.d("ISIDATA", result.data.toString())
                             binding.instrumentName.text = result.data.instrumentData[0].namaInstrument
                             binding.instrumenDesc.text = result.data.instrumentData[0].description
@@ -361,6 +501,9 @@ class DetailInstrumentActivity : AppCompatActivity() {
                             binding.rvAudio.setHasFixedSize(true)
                             binding.rvAudio.adapter = audioInstrumentAdapter
                             audioInstrumentAdapter.setListAudioInstrument(result.data.instrumentData[0].audioInstrumen)
+
+                            showToast("Data Loaded")
+                            isLoading(false)
                         }
 
                         is Result.Error -> {
@@ -379,8 +522,6 @@ class DetailInstrumentActivity : AppCompatActivity() {
                         }
 
                         is Result.Success -> {
-                            showToast("Data Loaded")
-                            isLoading(false)
                             Log.d("ISIDATA", result.data.toString())
 
                             adapter = GamelanAdapter(this@DetailInstrumentActivity)
@@ -389,6 +530,8 @@ class DetailInstrumentActivity : AppCompatActivity() {
                             binding.rvGamelanBaliHome.adapter = adapter
 
                             adapter.setListGamelan(result.data.gamelanData)
+                            showToast("Data Loaded")
+                            isLoading(false)
                         }
 
                         is Result.Error -> {
@@ -401,6 +544,60 @@ class DetailInstrumentActivity : AppCompatActivity() {
             binding.scrolling.isRefreshing = false
         }
         supportActionBar?.hide()
+    }
+
+    override fun repeatFunction() {
+        lifecycleScope.launch {
+            detailInstrumentViewModel = withContext(Dispatchers.IO) {
+                ViewModelFactory.getInstance(this@DetailInstrumentActivity).create(
+                    DetailInstrumentViewModel::class.java
+                )
+            }
+            detailInstrumentViewModel.getSessionUser()
+                .observe(this@DetailInstrumentActivity) { user ->
+                    if (user.isLogin) {
+                        detailInstrumentViewModel.getUserDatabyId(user.user_id)
+                            .observe(this@DetailInstrumentActivity) { save ->
+                                if (save != null) {
+                                    when (save) {
+                                        is Result.Loading -> {}
+
+                                        is Result.Success -> {
+                                            if (save.data.status != user.status) {
+                                                detailInstrumentViewModel.saveSession(
+                                                    UserModel(
+                                                        nama = save.data.nama,
+                                                        access_token = user.access_token,
+                                                        email = save.data.email,
+                                                        user_id = save.data.id,
+                                                        foto_profile = save.data.fotoProfile,
+                                                        role = save.data.role,
+                                                        status = save.data.status,
+                                                        isLogin = true,
+                                                        document = save.data.supportDocument
+                                                    )
+                                                )
+                                                if (user.role == "67619109cc4fa7bc6c0bdbc8" && user.status == "67618fc3cc4fa7bc6c0bdbbf") {
+                                                    binding.showEverythingCard.visibility =
+                                                        View.VISIBLE
+                                                    binding.statusBtn.visibility = View.VISIBLE
+                                                } else {
+                                                    binding.showEverythingCard.visibility =
+                                                        View.GONE
+                                                    binding.statusBtn.visibility = View.GONE
+                                                }
+                                            }
+                                        }
+
+                                        is Result.Error -> {
+                                            showToast(save.error)
+                                        }
+                                    }
+                                }
+                            }
+                    }
+                }
+        }
     }
 
     private fun showToast(message: String) {

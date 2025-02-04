@@ -1,14 +1,16 @@
 package com.reviling.filamentandroid.ui.inputsanggar
 
 import android.Manifest
+import android.annotation.SuppressLint
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.graphics.Color
-import android.graphics.drawable.ColorDrawable
 import android.net.Uri
 import android.os.Bundle
+import android.provider.DocumentsContract
 import android.util.Log
+import android.view.MotionEvent
 import android.view.View
 import android.widget.ArrayAdapter
 import android.widget.Button
@@ -20,32 +22,20 @@ import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.widget.SearchView
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.forEach
 import androidx.lifecycle.lifecycleScope
-import androidx.recyclerview.widget.GridLayoutManager
-import androidx.recyclerview.widget.LinearLayoutManager
-import com.bumptech.glide.Glide
-import com.google.android.material.search.SearchBar
 import com.reviling.filamentandroid.R
 import com.reviling.filamentandroid.ViewModelFactory
 import com.reviling.filamentandroid.data.Result
 import com.reviling.filamentandroid.databinding.ActivityInputDataSanggarBinding
-import com.reviling.filamentandroid.ui.adapter.HomeAdapter
-import com.reviling.filamentandroid.ui.adapter.InstrumentAdapter
-import com.reviling.filamentandroid.ui.home.HomeActivity
-import com.reviling.filamentandroid.ui.seeallsanggar.SeeAllSanggarActivity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import okhttp3.internal.notify
 import java.io.File
-import java.io.FileOutputStream
-import java.io.InputStream
+import java.util.regex.Pattern
 
 class InputDataSanggarActivity : AppCompatActivity() {
 
@@ -56,7 +46,9 @@ class InputDataSanggarActivity : AppCompatActivity() {
     private var file: File? = null
     private var idSanggar: String? = null
     private var fileFromEdit: String? = null
+    private var documentFile: File? = null
 
+    private var oldDocumentFile: String? = null
     private var namaSanggarBefore: String? = null
     private var noTeleponBefore: String? = null
     private var namaJalanBefore: String? = null
@@ -119,6 +111,29 @@ class InputDataSanggarActivity : AppCompatActivity() {
         }
     }
 
+    private val getFile = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+        if (it.resultCode == Activity.RESULT_OK) {
+            it.data?.data.let { uri ->
+                if (uri != null) {
+                    documentFile = uriToFile(uri, this@InputDataSanggarActivity)
+                    binding.chooseFile.text = getString(R.string.file_selected)
+                }
+            }
+        }
+    }
+
+    @SuppressLint("InlinedApi")
+    private fun openFolderFile() {
+        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
+            addCategory(Intent.CATEGORY_OPENABLE)
+            type = "application/pdf"
+            val uri = Uri.parse("content://com.android.externalstorage")
+            putExtra(DocumentsContract.EXTRA_INITIAL_URI, uri)
+        }
+        getFile.launch(intent)
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityInputDataSanggarBinding.inflate(layoutInflater)
@@ -162,6 +177,20 @@ class InputDataSanggarActivity : AppCompatActivity() {
 
             getListGamelan()
 
+            binding.chooseFile.setOnClickListener {
+                openFolderFile()
+            }
+
+            binding.edDeskripsi.setOnTouchListener { v, event ->
+                if (v.id == R.id.ed_deskripsi) {
+                    v.parent.requestDisallowInterceptTouchEvent(true)
+                    when (event.action and MotionEvent.ACTION_MASK) {
+                        MotionEvent.ACTION_UP -> v.parent.requestDisallowInterceptTouchEvent(false)
+                    }
+                }
+                false
+            }
+
             binding.chooseGamelan.setOnClickListener {
                 var selectedItem: MutableList<Int> = mutableListOf()
 
@@ -193,7 +222,7 @@ class InputDataSanggarActivity : AppCompatActivity() {
                 val buttonBatal: Button = dialogView.findViewById(R.id.batalkabbtn)
                 val headerView: TextView = dialogView.findViewById(R.id.title_alamat)
 
-                val adapter = ArrayAdapter(this@InputDataSanggarActivity, android.R.layout.simple_list_item_single_choice, itemsGamelan)
+                val adapter = ArrayAdapter(this@InputDataSanggarActivity, android.R.layout.simple_list_item_multiple_choice, itemsGamelan)
                 listView.adapter = adapter
 
                 listView.choiceMode = ListView.CHOICE_MODE_MULTIPLE
@@ -423,6 +452,8 @@ class InputDataSanggarActivity : AppCompatActivity() {
                                     selectedIdGamelanBefore.add(it.replace("\"", ""))
                                     selectedIdGamelanBeforeReal.add(it.replace("\"", ""))
                                 }
+
+                                binding.upload.text = "Simpan Perubahan"
                                 namaKabupatenPick = result.data.sanggarData[0].kabupaten
                                 namaKecamatanPick = result.data.sanggarData[0].kecamatan
                                 namaDesaPick = result.data.sanggarData[0].desa
@@ -448,6 +479,8 @@ class InputDataSanggarActivity : AppCompatActivity() {
                                 binding.imageView.text = getString(R.string.gambar_added)
                                 idDesaBefore = result.data.sanggarData[0].idDesa
                                 fileFromEdit = result.data.sanggarData[0].image
+                                oldDocumentFile = result.data.sanggarData[0].supportDocument
+                                binding.chooseFile.text = getString(R.string.file_selected)
 
                                 if (selectedIdGamelanBefore.isNotEmpty()) {
                                     binding.chooseGamelan.setText(R.string.gamelan_added)
@@ -475,13 +508,19 @@ class InputDataSanggarActivity : AppCompatActivity() {
                 var kodePos = binding.edKodePos.text.toString()
                 var deskripsi = binding.edDeskripsi.text.toString()
                 var fileImage = file
+                var document = documentFile
+                val pattern = "^[+]{1}(?:[0-9\\-\\(\\)\\/" +
+                        "\\.]\\s?){6,15}[0-9]{1}$"
+                val matches = Pattern.matches(pattern, noTelepon)
 
                 if (idSanggar == null) {
-                    Log.d("isidarifile", fileImage.toString())
+                    Log.d("PatternValidation", matches.toString())
                     if (namaSanggar.isEmpty()) {
                         binding.edNamaSanggar.error = getString(R.string.cannot_empty)
                     } else if (noTelepon.isEmpty()) {
                         binding.edNoTelepon.error = getString(R.string.cannot_empty)
+                    } else if (!matches) {
+                        binding.edNoTelepon.error = getString(R.string.format_phone)
                     } else if (namaJalan.isEmpty()) {
                         binding.edNamaJalan.error = getString(R.string.cannot_empty)
                     } else if (kodePos.isEmpty()) {
@@ -489,11 +528,13 @@ class InputDataSanggarActivity : AppCompatActivity() {
                     } else if (deskripsi.isEmpty()) {
                         binding.edDeskripsi.error = getString(R.string.cannot_empty)
                     } else if (fileImage == null) {
-                        showToast(getString(R.string.cannot_empty))
+                        showToast(getString(R.string.image_cannot_empty))
                     } else if (idDesa == null){
                         showToast(getString(R.string.cannot_field))
                     } else if (selectedIdGamelan.isEmpty()) {
-                        showToast(getString(R.string.cannot_field))
+                        showToast(getString(R.string.pilih_gamelan))
+                    } else if (document == null) {
+                        showToast(getString(R.string.upload_file_pendukung))
                     } else {
                         selectedIdGamelan.forEach { it.replace("\"", "") }
                         inputDataSanggarViewModel.createSanggarData(
@@ -504,7 +545,8 @@ class InputDataSanggarActivity : AppCompatActivity() {
                             kodePost = kodePos,
                             deskripsi = deskripsi,
                             idDesa = idDesa!!,
-                            gamelanId = selectedIdGamelan
+                            gamelanId = selectedIdGamelan,
+                            supportDocument = document
                         ).observe(this@InputDataSanggarActivity) { result ->
                             if (result != null) {
                                 when (result) {
@@ -527,6 +569,7 @@ class InputDataSanggarActivity : AppCompatActivity() {
                         }
                     }
                 } else {
+                    var flagsPhone = 1
 
                     if (namaJalan == namaJalanBefore) {
                         namaJalan = ""
@@ -550,6 +593,7 @@ class InputDataSanggarActivity : AppCompatActivity() {
 
                     if (noTelepon == noTeleponBefore) {
                         noTelepon = ""
+                        flagsPhone = 0
                     }
 
                     if (deskripsi == namaDeskripsiBefore) {
@@ -560,34 +604,43 @@ class InputDataSanggarActivity : AppCompatActivity() {
                         fileImage = null
                     }
 
+                    if (document == null) {
+                        document = null
+                    }
+
                     selectedIdGamelan.forEach { it.replace("\"", "") }
                     Log.d("IsiDariSEelctedgfa", selectedIdGamelan.toString())
-                    inputDataSanggarViewModel.updateSanggarData(
-                        id = idSanggar!!,
-                        fileImage = fileImage,
-                        namaSanggar = namaSanggar,
-                        noTelepon = noTelepon,
-                        namaJalan = namaJalan,
-                        kodePost = kodePos,
-                        deskripsi = deskripsi,
-                        idDesa = idDesa,
-                        gamelanId = selectedIdGamelan
-                    ).observe(this@InputDataSanggarActivity) { result ->
-                        if (result != null) {
-                            when (result) {
-                                is Result.Loading -> {
-                                    isLoading(true)
-                                }
+                    if (!matches && flagsPhone == 1) {
+                        binding.edNoTelepon.error = getString(R.string.format_phone)
+                    } else {
+                        inputDataSanggarViewModel.updateSanggarData(
+                            id = idSanggar!!,
+                            fileImage = fileImage,
+                            namaSanggar = namaSanggar,
+                            noTelepon = noTelepon,
+                            namaJalan = namaJalan,
+                            kodePost = kodePos,
+                            deskripsi = deskripsi,
+                            idDesa = idDesa,
+                            gamelanId = selectedIdGamelan,
+                            supportDocument = document
+                        ).observe(this@InputDataSanggarActivity) { result ->
+                            if (result != null) {
+                                when (result) {
+                                    is Result.Loading -> {
+                                        isLoading(true)
+                                    }
 
-                                is Result.Success -> {
-                                    showToast(result.data.message.toString())
-                                    isLoading(false)
-                                    onBackPressed()
-                                }
+                                    is Result.Success -> {
+                                        showToast(result.data.message.toString())
+                                        isLoading(false)
+                                        onBackPressed()
+                                    }
 
-                                is Result.Error -> {
-                                    showToast(result.error)
-                                    isLoading(false)
+                                    is Result.Error -> {
+                                        showToast(result.error)
+                                        isLoading(false)
+                                    }
                                 }
                             }
                         }

@@ -74,5 +74,8 @@ data class SanggarDataItem(
 	val status: String,
 
 	@field:SerializedName("updatedAt")
-	val updatedAt: String
+	val updatedAt: String,
+
+	@field:SerializedName("support_document")
+	val supportDocument: String
 )

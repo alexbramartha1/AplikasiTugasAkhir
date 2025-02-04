@@ -8,5 +8,6 @@ data class UserModel(
     val foto_profile: String,
     val role: String,
     val status: String,
-    val isLogin: Boolean = false
+    val isLogin: Boolean = false,
+    val document: String
 )

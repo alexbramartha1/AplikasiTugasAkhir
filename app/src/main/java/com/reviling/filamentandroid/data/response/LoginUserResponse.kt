@@ -1,6 +1,7 @@
 package com.reviling.filamentandroid.data.response
 
 import com.google.gson.annotations.SerializedName
+import retrofit2.http.Field
 
 data class LoginUserResponse(
 
@@ -38,5 +39,13 @@ data class LoginUserResponse(
 	val email: String,
 
 	@field:SerializedName("status")
-	val status: String
+	val status: String,
+
+	@field:SerializedName("support_document")
+	val supportDocument: String
+)
+
+data class ErrorLogin (
+	@field:SerializedName("detail")
+	val detailError: String
 )

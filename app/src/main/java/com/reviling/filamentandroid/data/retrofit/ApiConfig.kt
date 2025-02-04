@@ -30,7 +30,7 @@ object ApiConfig {
                 .build()
 
             val retrofit = Retrofit.Builder()
-                .baseUrl("https://fastapi-learn-production.up.railway.app/")
+                .baseUrl("https://fastapi-learn-production.up.railway.app/") //For Emaulator
                 .addConverterFactory(GsonConverterFactory.create())
                 .client(client)
                 .build()

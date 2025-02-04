@@ -85,7 +85,7 @@
                 android:layout_marginEnd="23dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textFieldNomorTelepon">
+                app:layout_constraintTop_toBottomOf="@+id/textFieldDeskripsi">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/ed_nama_jalan"
@@ -276,7 +276,7 @@
                 android:layout_marginEnd="23dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/pick_desa">
+                app:layout_constraintTop_toBottomOf="@+id/textFieldNomorTelepon">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/ed_deskripsi"
@@ -294,6 +294,19 @@
 
             </com.google.android.material.textfield.TextInputLayout>
 
+            <TextView
+                android:id="@+id/title_gambar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="23dp"
+                android:layout_marginTop="23dp"
+                android:fontFamily="@font/figtree_regular"
+                android:text="@string/upload_gambar_sanggar"
+                android:textAlignment="center"
+                android:textSize="18sp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/pick_desa" />
+
             <androidx.cardview.widget.CardView
                 android:id="@+id/cardView"
                 android:layout_width="match_parent"
@@ -301,14 +314,12 @@
                 android:layout_marginStart="23dp"
                 android:layout_marginTop="18dp"
                 android:layout_marginEnd="23dp"
-                android:layout_marginBottom="24dp"
                 android:backgroundTint="#F2B38B"
                 app:cardCornerRadius="10dp"
                 app:cardElevation="0dp"
-                app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textFieldDeskripsi">
+                app:layout_constraintTop_toBottomOf="@+id/title_gambar">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
@@ -332,6 +343,40 @@
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
             </androidx.cardview.widget.CardView>
+
+            <TextView
+                android:id="@+id/title_upload_dokumen"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="23dp"
+                android:layout_marginTop="23dp"
+                android:fontFamily="@font/figtree_regular"
+                android:text="@string/upload_file_pendukung"
+                android:textAlignment="center"
+                android:textSize="18sp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/cardView" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/chooseFile"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="23dp"
+                android:layout_marginTop="18dp"
+                android:layout_marginEnd="23dp"
+                android:layout_marginBottom="16dp"
+                android:backgroundTint="@color/gray"
+                android:drawableEnd="@drawable/baseline_cloud_upload_24"
+                android:text="@string/upload_bukti_kepemilikan"
+                android:textColor="@color/graybuttonoutline"
+                app:cornerRadius="4dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/title_upload_dokumen"
+                app:strokeColor="@color/graybuttonoutline"
+                app:strokeWidth="1dp" />
+
         </androidx.constraintlayout.widget.ConstraintLayout>
 
     </ScrollView>

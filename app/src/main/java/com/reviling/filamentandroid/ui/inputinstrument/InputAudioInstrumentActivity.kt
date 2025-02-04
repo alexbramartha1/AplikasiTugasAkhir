@@ -214,6 +214,7 @@ class InputAudioInstrumentActivity : AppCompatActivity() {
         val buttonBatal: MaterialButton = dialogView.findViewById(R.id.batal)
         buttonPickAudioTry = dialogView.findViewById(R.id.inputAudioFile)
         loadingDialog = dialogView.findViewById(R.id.progress_bar_dialog)
+        buttonPickAudioTry.text = getString(R.string.upload_audio_instrument)
 
         val builder = AlertDialog.Builder(this@InputAudioInstrumentActivity)
         builder

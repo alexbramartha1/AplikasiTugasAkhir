@@ -147,16 +147,36 @@
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/chooseRole"
-                android:layout_width="wrap_content"
+                android:layout_width="140dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="23dp"
                 android:layout_marginTop="20dp"
                 android:text="@string/pilih_role"
+                android:maxLines="1"
+                android:ellipsize="end"
                 android:textColor="@color/graybuttonoutline"
                 android:drawableEnd="@drawable/buttondown"
                 android:backgroundTint="@color/white"
                 app:cornerRadius="4dp"
                 app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textFieldPassword"
+                app:strokeColor="@color/graybuttonoutline"
+                app:strokeWidth="1dp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/chooseFile"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:backgroundTint="@color/white"
+                android:drawableEnd="@drawable/baseline_cloud_upload_24"
+                android:text="@string/upload_file_pendukung"
+                android:textColor="@color/graybuttonoutline"
+                android:visibility="gone"
+                app:cornerRadius="4dp"
+                app:layout_constraintEnd_toEndOf="@+id/textFieldPassword"
+                app:layout_constraintHorizontal_bias="1.0"
+                app:layout_constraintStart_toEndOf="@+id/chooseRole"
                 app:layout_constraintTop_toBottomOf="@+id/textFieldPassword"
                 app:strokeColor="@color/graybuttonoutline"
                 app:strokeWidth="1dp" />

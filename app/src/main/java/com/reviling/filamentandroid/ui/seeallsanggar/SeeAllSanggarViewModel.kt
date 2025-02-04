@@ -11,9 +11,11 @@ class SeeAllSanggarViewModel(private val repositoryData: RepositoryData): ViewMo
     fun getSessionUser(): LiveData<UserModel> {
         return repositoryData.getSession().asLiveData()
     }
-
+    fun getListKabupaten() = repositoryData.getListKabupaten()
     fun getAllSanggar() =  repositoryData.getAllSanggarBaliData()
     fun getAllSanggarByUserId(userId: String) = repositoryData.getSanggarByIdCreator(userId)
     fun getAllSanggarByName(namaSanggar: String) = repositoryData.getSanggarByName(namaSanggar)
+    fun getListStatus() = repositoryData.getListStatus()
+    fun getSanggarByFilter(id: String, statusId: List<String>) = repositoryData.getSanggarByFilter(id, statusId)
 
 }

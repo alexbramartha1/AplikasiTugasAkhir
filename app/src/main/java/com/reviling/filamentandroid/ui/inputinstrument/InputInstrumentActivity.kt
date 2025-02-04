@@ -12,15 +12,10 @@ import android.os.Bundle
 import android.provider.DocumentsContract
 import android.provider.OpenableColumns
 import android.util.Log
-import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
-import android.widget.ArrayAdapter
-import android.widget.Button
 import android.widget.EditText
-import android.widget.ImageView
 import android.widget.LinearLayout
-import android.widget.ListView
-import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.PickVisualMediaRequest
@@ -34,16 +29,13 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.android.material.bottomsheet.BottomSheetDialog
+import com.google.android.material.button.MaterialButton
 import com.reviling.filamentandroid.R
 import com.reviling.filamentandroid.ViewModelFactory
 import com.reviling.filamentandroid.data.Result
-import com.reviling.filamentandroid.data.preferences.UserModel
 import com.reviling.filamentandroid.databinding.ActivityInputInstrumentBinding
-import com.reviling.filamentandroid.ui.adapter.GamelanAdapter
 import com.reviling.filamentandroid.ui.adapter.InputMaterialAdapter
-import com.reviling.filamentandroid.ui.inputsanggar.InputDataSanggarViewModel
-import com.reviling.filamentandroid.ui.seeallinstrument.DetailSeeAllInstrumentActivity
-import com.reviling.filamentandroid.ui.seeallinstrument.SeeAllInstrumentViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -184,6 +176,7 @@ class InputInstrumentActivity : AppCompatActivity() {
         requestFileLauncher.launch(intent)
     }
 
+    @SuppressLint("ClickableViewAccessibility", "InflateParams")
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -228,6 +221,26 @@ class InputInstrumentActivity : AppCompatActivity() {
                     InputInstrumentViewModel::class.java)
             }
 
+            binding.edFungsiInstrument.setOnTouchListener { v, event ->
+                if (v.id == R.id.ed_fungsi_instrument) {
+                    v.parent.requestDisallowInterceptTouchEvent(true)
+                    when (event.action and MotionEvent.ACTION_MASK) {
+                        MotionEvent.ACTION_UP -> v.parent.requestDisallowInterceptTouchEvent(false)
+                    }
+                }
+                false
+            }
+
+            binding.edDeskripsiInstrument.setOnTouchListener { v, event ->
+                if (v.id == R.id.ed_deskripsi_instrument) {
+                    v.parent.requestDisallowInterceptTouchEvent(true)
+                    when (event.action and MotionEvent.ACTION_MASK) {
+                        MotionEvent.ACTION_UP -> v.parent.requestDisallowInterceptTouchEvent(false)
+                    }
+                }
+                false
+            }
+
             if (idInstrument != null) {
                 inputInstrumentViewModel.getDetailInstrumentById(idInstrument!!).observe(this@InputInstrumentActivity) { result ->
                     if (result != null) {
@@ -244,6 +257,8 @@ class InputInstrumentActivity : AppCompatActivity() {
                                 result.data.instrumentData[0].bahan.forEach {
                                     itemsMaterialBefore.add(it)
                                 }
+
+                                binding.uploadInstrumen.text = "Simpan dan Edit Audio"
 
                                 fileTridiBefore = result.data.instrumentData[0].tridImage
                                 listImageBefore = result.data.instrumentData[0].imageInstrumen
@@ -300,7 +315,35 @@ class InputInstrumentActivity : AppCompatActivity() {
             }
 
             binding.inputTridiView.setOnClickListener {
-                openSpecificFolder()
+                val dialogView = layoutInflater.inflate(R.layout.choose_fragment, null)
+                val btnChooseStorage: MaterialButton = dialogView.findViewById(R.id.chooseInStorage)
+                val btnChooseFromPolycam: MaterialButton = dialogView.findViewById(R.id.create3DFirst)
+                val builderConfirm = BottomSheetDialog(this@InputInstrumentActivity)
+
+                builderConfirm.setContentView(dialogView)
+                builderConfirm.show()
+
+                btnChooseStorage.setOnClickListener {
+                    openSpecificFolder()
+                    builderConfirm.cancel()
+                }
+
+                btnChooseFromPolycam.setOnClickListener {
+//                    val packages = packageManager.getInstalledApplications(PackageManager.GET_META_DATA)
+//
+//                    for (packageInfo in packages) {
+//                        Log.d("TAGFile", "Package name:" + packageInfo.packageName)
+//                    }
+                    val intent = packageManager.getLaunchIntentForPackage("com.polycam.polycam")
+                    if (intent != null) {
+                        builderConfirm.cancel()
+                        startActivity(intent)
+                    } else {
+                        val playStoreIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=ai.polycam&pcampaignid=web_share"))
+                        builderConfirm.cancel()
+                        startActivity(playStoreIntent)
+                    }
+                }
             }
 
             binding.inputMaterial.setOnClickListener {

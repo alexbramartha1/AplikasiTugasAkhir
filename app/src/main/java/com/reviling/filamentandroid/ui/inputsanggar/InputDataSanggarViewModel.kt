@@ -17,7 +17,8 @@ class InputDataSanggarViewModel(private val repositoryData: RepositoryData): Vie
         kodePost: String,
         deskripsi: String,
         idDesa: String,
-        gamelanId: MutableList<String>
+        gamelanId: MutableList<String>,
+        supportDocument: File
     ) = repositoryData.createDataSanggar(
         fileImage,
         namaSanggar,
@@ -26,7 +27,8 @@ class InputDataSanggarViewModel(private val repositoryData: RepositoryData): Vie
         kodePost,
         deskripsi,
         idDesa,
-        gamelanId
+        gamelanId,
+        supportDocument
     )
 
     fun updateSanggarData(
@@ -38,7 +40,8 @@ class InputDataSanggarViewModel(private val repositoryData: RepositoryData): Vie
         kodePost: String?,
         deskripsi: String?,
         idDesa: String?,
-        gamelanId: MutableList<String>?
+        gamelanId: MutableList<String>?,
+        supportDocument: File?
     ) = repositoryData.updateDataSanggar(
         id,
         fileImage,
@@ -48,7 +51,8 @@ class InputDataSanggarViewModel(private val repositoryData: RepositoryData): Vie
         kodePost,
         deskripsi,
         idDesa,
-        gamelanId
+        gamelanId,
+        supportDocument
     )
 
     fun getDetailSanggarById(id: String) = repositoryData.geDetailSanggarbyId(id)

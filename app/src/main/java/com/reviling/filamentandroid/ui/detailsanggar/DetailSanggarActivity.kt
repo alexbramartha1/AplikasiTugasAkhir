@@ -1,5 +1,6 @@
 package com.reviling.filamentandroid.ui.detailsanggar
 
+import android.app.DownloadManager
 import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
@@ -8,6 +9,8 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.Button
+import android.widget.ProgressBar
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AlertDialog
@@ -19,19 +22,23 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.CenterCrop
+import com.google.android.material.bottomsheet.BottomSheetDialog
+import com.google.android.material.button.MaterialButton
 import com.reviling.filamentandroid.R
 import com.reviling.filamentandroid.ViewModelFactory
 import com.reviling.filamentandroid.data.Result
 import com.reviling.filamentandroid.databinding.ActivityDetailSanggarBinding
-import com.reviling.filamentandroid.ui.CustomItemDecoration
 import com.reviling.filamentandroid.ui.adapter.GamelanAdapter
-import com.reviling.filamentandroid.ui.adapter.HomeAdapter
-import com.reviling.filamentandroid.ui.detailgamelan.DetailGamelanViewModel
 import com.reviling.filamentandroid.ui.inputsanggar.InputDataSanggarActivity
 import com.reviling.filamentandroid.ui.seeallsanggar.SeeAllSanggarActivity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.FileOutputStream
+import java.net.URL
+import java.net.URLEncoder
+import java.nio.channels.Channels
+
 
 class DetailSanggarActivity : AppCompatActivity() {
 
@@ -43,6 +50,9 @@ class DetailSanggarActivity : AppCompatActivity() {
     private var idUser: String = "idUser"
     private lateinit var gamelanAdapter: GamelanAdapter
     private var idListGamelan: MutableList<String> = mutableListOf()
+    private lateinit var manager: DownloadManager
+    private var statusDetail: String? = null
+    private lateinit var isLoadingBar: ProgressBar
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -58,6 +68,7 @@ class DetailSanggarActivity : AppCompatActivity() {
         }
 
         sanggarId = intent.getStringExtra(ID).toString()
+
         lifecycleScope.launch {
             detailSanggarViewModel = withContext(Dispatchers.IO) {
                 ViewModelFactory.getInstance(this@DetailSanggarActivity)
@@ -66,6 +77,51 @@ class DetailSanggarActivity : AppCompatActivity() {
 
             detailSanggarViewModel.getSessionUser().observe(this@DetailSanggarActivity) { user ->
                 idUser = user.user_id
+            }
+
+
+            binding.statusBtn.setOnClickListener {
+                val dialog = layoutInflater.inflate(R.layout.status_fragment, null)
+                val builder = BottomSheetDialog(this@DetailSanggarActivity)
+                val descriptionStatus: TextView = dialog.findViewById(R.id.status_description)
+                val statusApproval: MaterialButton = dialog.findViewById(R.id.status_approval)
+                isLoadingBar = dialog.findViewById(R.id.progress_bar_dialog_ask)
+
+                builder.setContentView(dialog)
+                builder.show()
+
+                detailSanggarViewModel.getNoteData(sanggarId).observe(this@DetailSanggarActivity) { result ->
+                    if (result != null) {
+                        when (result) {
+                            is Result.Loading -> {
+                                isLoadingBar.visibility = View.VISIBLE
+                            }
+
+                            is Result.Success -> {
+                                descriptionStatus.visibility = View.VISIBLE
+                                descriptionStatus.text = result.data.note
+                                statusApproval.text = statusDetail
+
+                                if (statusDetail == "Pending") {
+                                    statusApproval.setTextColor(getColor(R.color.white))
+                                    statusApproval.setBackgroundColor(getColor(R.color.pendingColor))
+                                } else if (statusDetail == "Unapproved") {
+                                    statusApproval.setTextColor(getColor(R.color.white))
+                                    statusApproval.setBackgroundColor(getColor(R.color.unapprovedColor))
+                                } else if (statusDetail == "Approved") {
+                                    statusApproval.setTextColor(getColor(R.color.white))
+                                    statusApproval.setBackgroundColor(getColor(R.color.approvedColor))
+                                }
+                                isLoadingBar.visibility = View.GONE
+                            }
+
+                            is Result.Error -> {
+                                showToast(result.error)
+                                isLoadingBar.visibility = View.GONE
+                            }
+                        }
+                    }
+                }
             }
 
             detailSanggarViewModel.getDetailSanggarById(sanggarId).observe(this@DetailSanggarActivity) { result ->
@@ -78,7 +134,59 @@ class DetailSanggarActivity : AppCompatActivity() {
                         is Result.Success -> {
                             showToast("Data Loaded")
                             isLoading(false)
+
+                            if (idUser != result.data.sanggarData[0].idCreator) {
+                                binding.statusBtn.visibility = View.GONE
+                            } else {
+                                binding.statusBtn.visibility = View.VISIBLE
+                                detailSanggarViewModel.getListStatus().observe(this@DetailSanggarActivity) { status ->
+                                    if (status != null) {
+                                        when (status) {
+                                            is Result.Loading -> {
+                                                isLoading(true)
+                                            }
+
+                                            is Result.Success -> {
+                                                val statusSanggar = result.data.sanggarData[0].status
+
+                                                status.data.forEach {
+                                                    if (it.id == statusSanggar) {
+                                                        binding.statusBtn.text = it.status
+                                                        statusDetail = it.status
+                                                        
+                                                        if (it.status == "Pending") {
+                                                            binding.statusBtn.setTextColor(getColor(R.color.white))
+                                                            binding.statusBtn.setBackgroundColor(getColor(R.color.pendingColor))
+                                                        } else if (it.status == "Unapproved") {
+                                                            binding.statusBtn.setTextColor(getColor(R.color.white))
+                                                            binding.statusBtn.setBackgroundColor(getColor(R.color.unapprovedColor))
+                                                        } else if (it.status == "Approved") {
+                                                            binding.statusBtn.setTextColor(getColor(R.color.white))
+                                                            binding.statusBtn.setBackgroundColor(getColor(R.color.approvedColor))
+                                                        }
+                                                    }
+                                                }
+
+                                                showToast("Data Loaded")
+                                                isLoading(false)
+                                            }
+
+                                            is Result.Error -> {
+                                                showToast(status.error)
+                                                isLoading(false)
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
                             Log.d("ISIDATA", result.data.toString())
+
+                            binding.downloadbutton.setOnClickListener {
+                                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(result.data.sanggarData[0].supportDocument))
+                                startActivity(intent)
+                            }
+
                             binding.sanggarName.text = result.data.sanggarData[0].namaSanggar
                             binding.sanggarDesc.text = result.data.sanggarData[0].deskripsi
                             binding.sanggarDescFull.text = result.data.sanggarData[0].deskripsi
@@ -124,7 +232,6 @@ class DetailSanggarActivity : AppCompatActivity() {
                                             }
                                         }
                                     }
-
                                 }
                             }
 
@@ -159,6 +266,7 @@ class DetailSanggarActivity : AppCompatActivity() {
 
                                 val buttonDelete = dialogView.findViewById<Button>(R.id.deletebtnsanggar)
                                 val buttonBatal = dialogView.findViewById<Button>(R.id.batalbtn)
+                                val loadingBar = dialogView.findViewById<ProgressBar>(R.id.progress_bar_dialog_ask)
 
                                 builder.setView(dialogView)
                                 val dialog = builder.create()
@@ -170,12 +278,12 @@ class DetailSanggarActivity : AppCompatActivity() {
                                         if (result != null) {
                                             when (result) {
                                                 is Result.Loading -> {
-                                                    isLoading(true)
+                                                    loadingBar.visibility = View.VISIBLE
                                                 }
 
                                                 is Result.Success -> {
                                                     showToast(result.data)
-                                                    isLoading(false)
+                                                    loadingBar.visibility = View.GONE
                                                     dialog.dismiss()
                                                     val intent = Intent(this@DetailSanggarActivity, SeeAllSanggarActivity::class.java)
                                                     intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
@@ -185,7 +293,7 @@ class DetailSanggarActivity : AppCompatActivity() {
 
                                                 is Result.Error -> {
                                                     showToast(result.error)
-                                                    isLoading(false)
+                                                    loadingBar.visibility = View.GONE
                                                 }
                                             }
                                         }
@@ -235,6 +343,51 @@ class DetailSanggarActivity : AppCompatActivity() {
                             showToast("Data Loaded")
                             isLoading(false)
                             Log.d("ISIDATA", result.data.toString())
+
+                            if (idUser != result.data.sanggarData[0].idCreator) {
+                                binding.statusBtn.visibility = View.GONE
+                            } else {
+                                binding.statusBtn.visibility = View.VISIBLE
+                                detailSanggarViewModel.getListStatus().observe(this@DetailSanggarActivity) { status ->
+                                    if (status != null) {
+                                        when (status) {
+                                            is Result.Loading -> {
+                                                isLoading(true)
+                                            }
+
+                                            is Result.Success -> {
+                                                val statusSanggar = result.data.sanggarData[0].status
+
+                                                status.data.forEach {
+                                                    if (it.id == statusSanggar) {
+                                                        binding.statusBtn.text = it.status
+
+                                                        if (it.status == "Pending") {
+                                                            binding.statusBtn.setTextColor(getColor(R.color.white))
+                                                            binding.statusBtn.setBackgroundColor(getColor(R.color.pendingColor))
+                                                        } else if (it.status == "Unapproved") {
+                                                            binding.statusBtn.setTextColor(getColor(R.color.white))
+                                                            binding.statusBtn.setBackgroundColor(getColor(R.color.unapprovedColor))
+                                                        } else if (it.status == "Approved") {
+                                                            binding.statusBtn.setTextColor(getColor(R.color.white))
+                                                            binding.statusBtn.setBackgroundColor(getColor(R.color.approvedColor))
+                                                        }
+                                                    }
+                                                }
+
+                                                showToast("Data Loaded")
+                                                isLoading(false)
+                                            }
+
+                                            is Result.Error -> {
+                                                showToast(status.error)
+                                                isLoading(false)
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
                             binding.sanggarName.text = result.data.sanggarData[0].namaSanggar
                             binding.sanggarDesc.text = result.data.sanggarData[0].deskripsi
                             binding.sanggarDescFull.text = result.data.sanggarData[0].deskripsi
@@ -278,10 +431,13 @@ class DetailSanggarActivity : AppCompatActivity() {
                                             }
                                         }
                                     }
-
                                 }
                             }
 
+                            binding.downloadbutton.setOnClickListener {
+                                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(result.data.sanggarData[0].supportDocument))
+                                startActivity(intent)
+                            }
 
                             binding.gotomaps.setOnClickListener {
                                 val mapIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://www.google.com/maps/search/?api=1&query=${result.data.sanggarData[0].namaSanggar}"))
@@ -314,6 +470,7 @@ class DetailSanggarActivity : AppCompatActivity() {
 
                                 val buttonDelete = dialogView.findViewById<Button>(R.id.deletebtnsanggar)
                                 val buttonBatal = dialogView.findViewById<Button>(R.id.batalbtn)
+                                val loadingBar = dialogView.findViewById<ProgressBar>(R.id.progress_bar_dialog_ask)
 
                                 builder.setView(dialogView)
                                 val dialog = builder.create()
@@ -325,12 +482,12 @@ class DetailSanggarActivity : AppCompatActivity() {
                                         if (result != null) {
                                             when (result) {
                                                 is Result.Loading -> {
-                                                    isLoading(true)
+                                                    loadingBar.visibility = View.VISIBLE
                                                 }
 
                                                 is Result.Success -> {
                                                     showToast(result.data)
-                                                    isLoading(false)
+                                                    loadingBar.visibility = View.GONE
                                                     dialog.dismiss()
 
                                                     val intent = Intent(this@DetailSanggarActivity, SeeAllSanggarActivity::class.java)
@@ -341,7 +498,7 @@ class DetailSanggarActivity : AppCompatActivity() {
 
                                                 is Result.Error -> {
                                                     showToast(result.error)
-                                                    isLoading(false)
+                                                    loadingBar.visibility = View.GONE
                                                 }
                                             }
                                         }
@@ -381,13 +538,14 @@ class DetailSanggarActivity : AppCompatActivity() {
                 binding.calls.visibility = View.VISIBLE
                 binding.chats.visibility = View.VISIBLE
                 binding.gotomaps.visibility = View.VISIBLE
+                binding.downloadbutton.visibility = View.VISIBLE
 
                 if (flagsEdit){
                     binding.editdatacard.visibility = View.VISIBLE
                     binding.deletebtn.visibility = View.VISIBLE
                 } else {
-                    binding.editdatacard.visibility = View.INVISIBLE
-                    binding.deletebtn.visibility = View.INVISIBLE
+                    binding.editdatacard.visibility = View.GONE
+                    binding.deletebtn.visibility = View.GONE
                 }
 
                 flags = false
@@ -395,6 +553,7 @@ class DetailSanggarActivity : AppCompatActivity() {
                 binding.calls.visibility = View.GONE
                 binding.chats.visibility = View.GONE
                 binding.gotomaps.visibility = View.GONE
+                binding.downloadbutton.visibility = View.GONE
 
                 if (flagsEdit){
                     binding.editdatacard.visibility = View.GONE
@@ -418,6 +577,7 @@ class DetailSanggarActivity : AppCompatActivity() {
     private fun isLoading(loading: Boolean) {
         binding.progressBar.visibility = if (loading) View.VISIBLE else View.GONE
     }
+
     companion object {
         const val ID = "sanggarId"
     }

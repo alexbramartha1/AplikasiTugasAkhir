@@ -19,6 +19,8 @@ import java.nio.ByteBuffer
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.ResponseBody
+import java.io.BufferedReader
+import java.nio.Buffer
 
 class CustomViewer {
     companion object {
@@ -29,6 +31,7 @@ class CustomViewer {
 
     private lateinit var choreographer: Choreographer
     lateinit var modelViewer: ModelViewer
+    lateinit var buffer: ByteBuffer
 
     fun loadEntity() {
         choreographer = Choreographer.getInstance()
@@ -53,9 +56,21 @@ class CustomViewer {
         }
     }
 
+    suspend fun loadGlbFromLocal(context: Context, url: Buffer, modelViewer: ModelViewer) {
+        try {
+            modelViewer.apply {
+                loadModelGlb(url)
+                transformToUnitCube()
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            // Handle error: show a message to the user or log it
+        }
+    }
+
     suspend fun loadGlbFromUrl(context: Context, url: String, modelViewer: ModelViewer) {
         try {
-            val buffer = fetchGlbFromUrl(url)
+            buffer = fetchGlbFromUrl(url)
             modelViewer.apply {
                 loadModelGlb(buffer)
                 transformToUnitCube()
@@ -66,7 +81,7 @@ class CustomViewer {
         }
     }
 
-    private suspend fun fetchGlbFromUrl(url: String): ByteBuffer = withContext(Dispatchers.IO) {
+    suspend fun fetchGlbFromUrl(url: String): ByteBuffer = withContext(Dispatchers.IO) {
         val client = OkHttpClient()
         val request = Request.Builder().url(url).build()
         client.newCall(request).execute().use { response ->

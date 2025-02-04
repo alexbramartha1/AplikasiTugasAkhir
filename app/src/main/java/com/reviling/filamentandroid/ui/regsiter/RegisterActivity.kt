@@ -1,7 +1,12 @@
 package com.reviling.filamentandroid.ui.regsiter
 
+import android.annotation.SuppressLint
+import android.app.Activity
+import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
+import android.provider.DocumentsContract
 import android.util.Log
 import android.view.View
 import android.widget.ArrayAdapter
@@ -10,6 +15,7 @@ import android.widget.ListView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
@@ -24,6 +30,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import com.reviling.filamentandroid.data.Result
+import java.io.File
 
 class RegisterActivity : AppCompatActivity() {
 
@@ -34,6 +41,29 @@ class RegisterActivity : AppCompatActivity() {
     private var idRoleFlag: Int? = null
     private var idRoleSelect: String? = null
     private var roleSelectedName: String? = null
+    private var fileSelected: File? = null
+
+    private val getFile = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+        if (it.resultCode == Activity.RESULT_OK) {
+            it.data?.data.let { uri ->
+                if (uri != null) {
+                    fileSelected = uriToFile(uri, this@RegisterActivity)
+                    binding.chooseFile.text = getString(R.string.file_selected)
+                }
+            }
+        }
+    }
+
+    @SuppressLint("InlinedApi")
+    private fun openFolderFile() {
+        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
+            addCategory(Intent.CATEGORY_OPENABLE)
+            type = "application/pdf"
+            val uri = Uri.parse("content://com.android.externalstorage")
+            putExtra(DocumentsContract.EXTRA_INITIAL_URI, uri)
+        }
+        getFile.launch(intent)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -55,8 +85,6 @@ class RegisterActivity : AppCompatActivity() {
 
             getAllRoleList()
         }
-
-
 
         binding.chooseRole.setOnClickListener {
             var selectedItem = 0
@@ -92,16 +120,30 @@ class RegisterActivity : AppCompatActivity() {
                 idRoleFlag = selectedPosition
                 idRoleSelect = idRole[selectedPosition]
                 roleSelectedName = adapter.getItem(selectedPosition)
+
+                if (roleSelectedName != "Pengguna") {
+                    binding.chooseFile.visibility = View.VISIBLE
+                } else {
+                    binding.chooseFile.visibility = View.GONE
+                    binding.chooseFile.text = getString(R.string.upload_file_pendukung)
+                    fileSelected = null
+                }
+
                 dialog.dismiss()
             }
 
             buttonBatal.setOnClickListener { dialog.dismiss() }
         }
 
+        binding.chooseFile.setOnClickListener {
+            openFolderFile()
+        }
+
         binding.btnRegister.setOnClickListener {
             val nama = binding.edUsername.text.toString()
             val email = binding.edEmail.text.toString()
             val password = binding.edPassword.text.toString()
+            val document = fileSelected
 
             if (nama.isEmpty()) {
                 binding.edUsername.error = getString(R.string.cannot_empty)
@@ -111,8 +153,37 @@ class RegisterActivity : AppCompatActivity() {
                 binding.edPassword.error = getString(R.string.cannot_empty)
             } else if (idRoleSelect == null) {
                 showToast(getString(R.string.role_cannot_empty))
+            } else if (idRoleSelect != "676190f1cc4fa7bc6c0bdbc4") {
+                if (document == null) {
+                    showToast(getString(R.string.upload_file_pendukung))
+                } else {
+                    registViewModel.registerUser(nama, email, password, idRoleSelect!!, document).observe(this) { result ->
+                        if (result != null) {
+                            when (result) {
+                                is Result.Loading -> {
+                                    isLoading(true)
+                                }
+
+                                is Result.Success -> {
+                                    showToast(result.data)
+                                    isLoading(false)
+
+                                    val intentMain = Intent(this, LoginActivity::class.java)
+                                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
+                                    startActivity(intentMain)
+                                    finish()
+                                }
+
+                                is Result.Error -> {
+                                    showToast(result.error)
+                                    isLoading(false)
+                                }
+                            }
+                        }
+                    }
+                }
             } else {
-                registViewModel.registerUser(nama, email, password, idRoleSelect!!).observe(this) { result ->
+                registViewModel.registerUser(nama, email, password, idRoleSelect!!, document).observe(this) { result ->
                     if (result != null) {
                         when (result) {
                             is Result.Loading -> {
@@ -155,6 +226,18 @@ class RegisterActivity : AppCompatActivity() {
 
     private fun isLoading(loading: Boolean) {
         binding.progressBar.visibility = if (loading) View.VISIBLE else View.GONE
+    }
+
+    private fun uriToFile(uri: Uri, context: Context): File {
+        val contentResolver = context.contentResolver
+        val file = File(context.cacheDir, "temp_file_${System.currentTimeMillis()}")
+
+        contentResolver.openInputStream(uri)?.use { inputStream ->
+            file.outputStream().use { outputStream ->
+                inputStream.copyTo(outputStream)
+            }
+        }
+        return file
     }
 
     private fun getAllRoleList() {

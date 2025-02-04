@@ -29,7 +29,7 @@ data class GamelanDataItem(
 	@SerializedName("instrument_id")
 	val instrumentId: List<String>,
 
-	@SerializedName("status")
+	@SerializedName("status_id")
 	val status: String,
 
 	@SerializedName("createdAt")

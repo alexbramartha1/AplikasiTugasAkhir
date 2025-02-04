@@ -1,7 +1,9 @@
 package com.reviling.filamentandroid
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.SurfaceView
 import android.view.View
 import android.widget.Button
@@ -12,9 +14,13 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.model.ByteArrayLoader.ByteBufferFactory
 import com.bumptech.glide.load.resource.bitmap.CenterCrop
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
+import com.google.android.material.button.MaterialButton
 import kotlinx.coroutines.launch
+import okio.ByteString.Companion.toByteString
+import java.nio.ByteBuffer
 
 
 class MainActivity : AppCompatActivity() {
@@ -22,7 +28,13 @@ class MainActivity : AppCompatActivity() {
     var surfaceView: SurfaceView? = null
     var customViewer: CustomViewer = CustomViewer()
     private lateinit var dataUrl: String
+    private lateinit var dataId: String
     private lateinit var dataImage: String
+    private lateinit var downloadButton: MaterialButton
+    private lateinit var deleteButton: MaterialButton
+    private var bufferHere: ByteBuffer? = null
+    private var dataIdSave: String? = null
+    private var deleteFlags: Int = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -32,6 +44,10 @@ class MainActivity : AppCompatActivity() {
 
         dataUrl = intent.getStringExtra(URL).toString()
         dataImage = intent.getStringExtra(IMAGE).toString()
+        dataId = intent.getStringExtra(IDTRIDI).toString()
+
+        downloadButton = findViewById(R.id.saveButton)
+        deleteButton = findViewById(R.id.deleteButton)
 
         val imageView: ImageView = findViewById(R.id.image_ketuk)
 
@@ -42,14 +58,79 @@ class MainActivity : AppCompatActivity() {
                 .into(imageView)
         }
 
-        customViewer.run {
+        var files: Array<String> = this.fileList()
 
+        for (file in files) {
+            if ("${dataId}.glb" == file) {
+                dataIdSave = file
+            }
+        }
+
+        customViewer.run {
             loadEntity()
             setSurfaceView(requireNotNull(surfaceView))
             lifecycleScope.launch {
                 isLoading(true)
-                loadGlbFromUrl(this@MainActivity, dataUrl, modelViewer)
-                isLoading(false)
+//                downloadButton.isEnabled = false
+//                loadGlbFromUrl(this@MainActivity, dataUrl, modelViewer)
+//                isLoading(false)
+//                downloadButton.isEnabled = true
+
+                downloadButton.setOnClickListener {
+                    if (deleteFlags == 1) {
+                        lifecycleScope.launch {
+                            isLoading(true)
+                            loadGlbFromUrl(this@MainActivity, dataUrl, modelViewer)
+                            this@MainActivity.openFileOutput("${dataId}.glb", Context.MODE_PRIVATE).use {
+                                it.write(buffer.toByteString().toByteArray())
+                                deleteButton.isEnabled = true
+                                downloadButton.isEnabled = false
+                            }
+                            isLoading(false)
+                        }
+                    } else {
+                        isLoading(true)
+                        this@MainActivity.openFileOutput("${dataId}.glb", Context.MODE_PRIVATE).use {
+                            it.write(buffer.toByteString().toByteArray())
+                            deleteButton.isEnabled = true
+                            downloadButton.isEnabled = false
+                        }
+                        isLoading(false)
+                    }
+                }
+
+                deleteButton.setOnClickListener {
+                    isLoading(true)
+                    var files: Array<String> = this@MainActivity.fileList()
+
+                    for (file in files) {
+                        Log.d("IsiDariFiles", file)
+                    }
+
+                    this@MainActivity.deleteFile("${dataId}.glb")
+                    downloadButton.isEnabled = true
+                    deleteButton.isEnabled = false
+                    deleteFlags = 1
+                    isLoading(false)
+                }
+
+                if (dataIdSave != null) {
+                    val filesTest = filesDir.listFiles()
+                    filesTest?.filter { it.canRead() && it.isFile && it.name.endsWith(".glb") && it.name == "${dataId}.glb" }?.map {
+                        val bytes = it.readBytes()
+                        val buffer = ByteBuffer.wrap(bytes)
+                        loadGlbFromLocal(this@MainActivity, buffer, modelViewer)
+                    }
+                    downloadButton.isEnabled = false
+                    deleteButton.isEnabled = true
+                    isLoading(false)
+                } else {
+                    loadGlbFromUrl(this@MainActivity, dataUrl, modelViewer)
+                    bufferHere = buffer
+                    isLoading(false)
+                    downloadButton.isEnabled = true
+                    deleteButton.isEnabled = false
+                }
             }
 
             loadIndirectLight(this@MainActivity, "venetian_crossroads_2k")
@@ -152,5 +233,6 @@ class MainActivity : AppCompatActivity() {
     companion object {
         const val URL = "urlTridi"
         const val IMAGE = "fileImage"
+        const val IDTRIDI = "idtridi"
     }
 }

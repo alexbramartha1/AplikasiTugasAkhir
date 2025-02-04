@@ -19,8 +19,9 @@
 
             <androidx.cardview.widget.CardView
                 android:id="@+id/cardView3"
-                android:layout_width="wrap_content"
-                android:layout_height="0dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="visible"
                 app:cardElevation="0dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -28,26 +29,16 @@
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent">
+                    android:layout_height="wrap_content">
 
                     <com.google.android.material.search.SearchBar
                         android:id="@+id/search_bar_gamelan"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"                        android:layout_marginStart="23dp"
-                        android:layout_marginTop="23dp"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="23dp"
                         android:layout_marginEnd="23dp"
-                        android:layout_marginBottom="23dp"
                         android:backgroundTint="#F3F3F3"
                         android:hint="@string/search_gamelan_bali"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
-
-                    <com.google.android.material.search.SearchView
-                        android:id="@+id/search_view_gamelan"
-                        android:layout_width="match_parent"
-                        android:layout_height="0dp"
-                        app:backgroundTint="@color/white"
                         app:layout_constraintBottom_toTopOf="@+id/scrollButton"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
@@ -55,16 +46,15 @@
 
                     <HorizontalScrollView
                         android:id="@+id/scrollButton"
-                        android:layout_width="0dp"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="20dp"
-                        android:layout_marginBottom="20dp"
+                        android:layout_marginBottom="17dp"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@+id/search_bar_gamelan">
+                        app:layout_constraintStart_toStartOf="parent">
 
                         <androidx.constraintlayout.widget.ConstraintLayout
+                            android:id="@+id/constraintScroll"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content">
 
@@ -133,9 +123,45 @@
 
                     </HorizontalScrollView>
 
+
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
             </androidx.cardview.widget.CardView>
+            <com.google.android.material.search.SearchView
+                android:id="@+id/search_view_gamelan"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                app:backgroundTint="@color/white"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+            <TextView
+                android:id="@+id/gamelan_desc"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="23dp"
+                android:layout_marginTop="23dp"
+                android:layout_marginEnd="23dp"
+                android:fontFamily="@font/figtree_medium"
+                android:textSize="14sp"
+                android:visibility="gone"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/cardView3" />
+
+            <TextView
+                android:id="@+id/title_gamelan_rv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="23dp"
+                android:layout_marginTop="18dp"
+                android:fontFamily="@font/figtree_regular"
+                android:text="@string/gamelan_bali_rv"
+                android:textAlignment="center"
+                android:textSize="22sp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/gamelan_desc" />
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rv_gamelan_bali_home"
@@ -144,7 +170,7 @@
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/cardView3" />
+                app:layout_constraintTop_toBottomOf="@+id/title_gamelan_rv" />
 
             <ProgressBar
                 android:id="@+id/progress_bar"

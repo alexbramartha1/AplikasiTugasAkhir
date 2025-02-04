@@ -25,6 +25,7 @@ class UserPreferences private constructor(private val dataStore: DataStore<Prefe
             preferences[ROLE] = user.role
             preferences[STATUS] = user.status
             preferences[IS_LOGIN_KEY] = true
+            preferences[DOCUMENT] = user.document
         }
     }
 
@@ -38,7 +39,8 @@ class UserPreferences private constructor(private val dataStore: DataStore<Prefe
                 preferences[FOTO_PROFILE] ?: "",
                 preferences[ROLE] ?: "",
                 preferences[STATUS] ?: "",
-                preferences[IS_LOGIN_KEY] ?: false
+                preferences[IS_LOGIN_KEY] ?: false,
+                preferences[DOCUMENT] ?: ""
             )
         }
     }
@@ -61,6 +63,7 @@ class UserPreferences private constructor(private val dataStore: DataStore<Prefe
         private val ROLE = stringPreferencesKey("role")
         private val STATUS = stringPreferencesKey("status")
         private val USER_ID = stringPreferencesKey("user_id")
+        private val DOCUMENT = stringPreferencesKey("support_document")
 
         fun getInstance(dataStore: DataStore<Preferences>): UserPreferences {
             return INSTANCE ?: synchronized(this) {

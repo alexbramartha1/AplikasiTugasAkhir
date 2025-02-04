@@ -1,11 +1,14 @@
 package com.reviling.filamentandroid.ui.home
 
+import android.annotation.SuppressLint
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.net.Uri
 import android.os.Bundle
+import android.provider.DocumentsContract
 import android.util.Log
 import android.view.View
 import android.view.inputmethod.EditorInfo
@@ -35,6 +38,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.CenterCrop
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
+import com.google.android.material.button.MaterialButton
 import com.google.android.material.search.SearchBar
 import com.reviling.filamentandroid.R
 import com.reviling.filamentandroid.ViewModelFactory
@@ -46,6 +50,10 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import com.reviling.filamentandroid.data.Result
 import com.reviling.filamentandroid.data.preferences.UserModel
+import com.reviling.filamentandroid.data.response.GamelanDataItem
+import com.reviling.filamentandroid.data.response.InstrumentDataItem
+import com.reviling.filamentandroid.data.response.SanggarDataItem
+import com.reviling.filamentandroid.ui.BaseActivity
 import com.reviling.filamentandroid.ui.CustomItemDecoration
 import com.reviling.filamentandroid.ui.adapter.InstrumentAdapter
 import com.reviling.filamentandroid.ui.adapter.SanggarAdapter
@@ -54,10 +62,14 @@ import com.reviling.filamentandroid.ui.login.LoginViewModel
 import com.reviling.filamentandroid.ui.seeallgamelan.SeeAllGamelanBaliActivity
 import com.reviling.filamentandroid.ui.seeallinstrument.DetailSeeAllInstrumentActivity
 import com.reviling.filamentandroid.ui.seeallsanggar.SeeAllSanggarActivity
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.runBlocking
 import java.io.File
-class HomeActivity : AppCompatActivity() {
+
+class HomeActivity : BaseActivity() {
 
     private lateinit var binding: ActivityHomeBinding
     private lateinit var adapter: HomeAdapter
@@ -67,7 +79,65 @@ class HomeActivity : AppCompatActivity() {
     private var currentImageUri: Uri? = null
     private var file: File? = null
     private var roleId: String? = null
+    private var statusId: String? = null
     private var nameRole: String? = null
+    private var tokenUser: String? = null
+    private lateinit var buttonUpdateDoc: MaterialButton
+    private lateinit var buttonViewDoc: MaterialButton
+    private var userID: String? = null
+    private var fileSelected: File? = null
+    private lateinit var isLoadingProfile: ProgressBar
+    private var fullShowOrNot: Boolean = true
+    private var dataSetApproved: MutableList<GamelanDataItem> = mutableListOf()
+    private var dataSetApprovedInstrument: MutableList<InstrumentDataItem> = mutableListOf()
+    private var dataSetApprovedSanggar: MutableList<SanggarDataItem> = mutableListOf()
+
+    private val getFile = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+        if (it.resultCode == Activity.RESULT_OK) {
+            it.data?.data.let { uri ->
+                if (uri != null) {
+                    fileSelected = uriToFile(uri, this@HomeActivity)
+
+                    lifecycleScope.launch {
+                        homeViewModel = withContext(Dispatchers.IO) {
+                            ViewModelFactory.getInstance(this@HomeActivity).create(HomeViewModel::class.java)
+                        }
+
+                        homeViewModel.updateDocumenet(userID!!, fileSelected!!).observe(this@HomeActivity) { user ->
+                            if (user != null) {
+                                when (user) {
+                                    is Result.Loading -> {
+                                        isLoadingProfile.visibility = View.VISIBLE
+                                    }
+
+                                    is Result.Success -> {
+                                        isLoadingProfile.visibility = View.GONE
+                                        showToast("Document Updated")
+                                    }
+
+                                    is Result.Error -> {
+                                        showToast(user.error)
+                                        isLoadingProfile.visibility = View.GONE
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    @SuppressLint("InlinedApi")
+    private fun openFolderFile() {
+        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
+            addCategory(Intent.CATEGORY_OPENABLE)
+            type = "application/pdf"
+            val uri = Uri.parse("content://com.android.externalstorage")
+            putExtra(DocumentsContract.EXTRA_INITIAL_URI, uri)
+        }
+        getFile.launch(intent)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -113,8 +183,51 @@ class HomeActivity : AppCompatActivity() {
                             .into(binding.profileImage)
                     }
 
+                    homeViewModel.getUserDatabyId(user.user_id).observe(this@HomeActivity) { save ->
+                        if (save != null) {
+                            when (save) {
+                                is Result.Loading -> {
+                                    isLoading(false)
+                                }
+
+                                is Result.Success -> {
+                                    if (save.data.status != user.status) {
+                                        homeViewModel.saveSession(UserModel(
+                                            nama = save.data.nama,
+                                            access_token = user.access_token,
+                                            email = save.data.email,
+                                            user_id = save.data.id,
+                                            foto_profile = save.data.fotoProfile,
+                                            role = save.data.role,
+                                            status = save.data.status,
+                                            isLogin = true,
+                                            document = save.data.supportDocument
+                                        ))
+
+                                        showToast("Status Updated")
+                                        isLoading(false)
+                                    }
+                                }
+
+                                is Result.Error -> {
+                                    showToast(save.error)
+                                    isLoading(false)
+                                }
+                            }
+                        }
+                    }
+
+                    tokenUser = user.access_token
+                    userID = user.user_id
                     roleId = user.role
+                    statusId = user.status
                     getAllRoleList()
+
+                    if (roleId == "676190f1cc4fa7bc6c0bdbc4" || statusId == "67618f9ecc4fa7bc6c0bdbbb" || statusId == "67618fe3cc4fa7bc6c0bdbc1") {
+                        fullShowOrNot = true
+                    } else {
+                        fullShowOrNot = false
+                    }
 
                     binding.profileImage.setOnClickListener {
                         val builder = AlertDialog.Builder(this@HomeActivity)
@@ -124,9 +237,125 @@ class HomeActivity : AppCompatActivity() {
                         val imageEdit = dialogView.findViewById<ImageView>(R.id.image_edit)
                         val usernameEdit = dialogView.findViewById<TextView>(R.id.username_edit)
                         val logoutButton = dialogView.findViewById<Button>(R.id.logoutbutton)
-                        val loadingView = dialogView.findViewById<ProgressBar>(R.id.progress_bar_profile)
+                        isLoadingProfile = dialogView.findViewById(R.id.progress_bar_profile)
                         val emailView = dialogView.findViewById<TextView>(R.id.email_pengguna)
                         val roleView = dialogView.findViewById<TextView>(R.id.roleView)
+                        val statusUser = dialogView.findViewById<MaterialButton>(R.id.status)
+                        val refreshBtn = dialogView.findViewById<MaterialButton>(R.id.refreshBtn)
+                        buttonViewDoc = dialogView.findViewById(R.id.seeDoc)
+                        buttonUpdateDoc = dialogView.findViewById(R.id.editDoc)
+
+                        if (roleId != "676190f1cc4fa7bc6c0bdbc4") {
+                            buttonViewDoc.visibility = View.VISIBLE
+                            buttonUpdateDoc.visibility = View.VISIBLE
+                        } else {
+                            buttonViewDoc.visibility = View.GONE
+                            buttonUpdateDoc.visibility = View.GONE
+                        }
+
+                        buttonViewDoc.setOnClickListener {
+                            homeViewModel.getUserDatabyId(userID!!).observe(this@HomeActivity) { save ->
+                                if (save != null) {
+                                    when (save) {
+                                        is Result.Loading -> {
+                                            isLoadingProfile.visibility = View.VISIBLE
+                                        }
+
+                                        is Result.Success -> {
+                                            Log.d("IsidariFile", user.document)
+                                            Log.d("IsidariFileServer", save.data.supportDocument)
+                                            isLoadingProfile.visibility = View.GONE
+                                            homeViewModel.saveSession(UserModel(
+                                                nama = save.data.nama,
+                                                access_token = tokenUser!!,
+                                                email = save.data.email,
+                                                user_id = save.data.id,
+                                                foto_profile = save.data.fotoProfile,
+                                                role = save.data.role,
+                                                status = save.data.status,
+                                                isLogin = true,
+                                                document = save.data.supportDocument
+                                            ))
+
+                                            val mapIntent = Intent(Intent.ACTION_VIEW, Uri.parse(save.data.supportDocument))
+                                            startActivity(mapIntent)
+                                        }
+
+                                        is Result.Error -> {
+                                            showToast(save.error)
+                                            isLoadingProfile.visibility = View.GONE
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        buttonUpdateDoc.setOnClickListener {
+                            openFolderFile()
+                        }
+
+                        refreshBtn.setOnClickListener {
+                            homeViewModel.getUserDatabyId(user.user_id).observe(this@HomeActivity) { save ->
+                                if (save != null) {
+                                    when (save) {
+                                        is Result.Loading -> {}
+
+                                        is Result.Success -> {
+                                            if (save.data.status != user.status) {
+                                                homeViewModel.saveSession(UserModel(
+                                                    nama = save.data.nama,
+                                                    access_token = user.access_token,
+                                                    email = save.data.email,
+                                                    user_id = save.data.id,
+                                                    foto_profile = save.data.fotoProfile,
+                                                    role = save.data.role,
+                                                    status = save.data.status,
+                                                    isLogin = true,
+                                                    document = save.data.supportDocument
+                                                ))
+                                            }
+
+                                            homeViewModel.getListStatus().observe(this@HomeActivity) { status ->
+                                                if (status != null) {
+                                                    when (status) {
+                                                        is Result.Loading -> {
+                                                            isLoadingProfile.visibility = View.VISIBLE
+                                                        }
+
+                                                        is Result.Success -> {
+                                                            status.data.forEach {
+                                                                if (it.id == user.status) {
+                                                                    statusUser.text = it.status
+                                                                    if (it.status == "Pending") {
+                                                                        statusUser.setTextColor(getColor(R.color.white))
+                                                                        statusUser.setBackgroundColor(getColor(R.color.pendingColor))
+                                                                    } else if (it.status == "Unapproved") {
+                                                                        statusUser.setTextColor(getColor(R.color.white))
+                                                                        statusUser.setBackgroundColor(getColor(R.color.unapprovedColor))
+                                                                    } else if (it.status == "Approved") {
+                                                                        statusUser.setTextColor(getColor(R.color.white))
+                                                                        statusUser.setBackgroundColor(getColor(R.color.approvedColor))
+                                                                    }
+                                                                }
+                                                            }
+                                                            isLoadingProfile.visibility = View.GONE
+                                                            showToast("Status Updated")
+                                                        }
+
+                                                        is Result.Error -> {
+                                                            showToast(status.error)
+                                                            isLoadingProfile.visibility = View.GONE
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+
+                                        is Result.Error -> {}
+                                    }
+                                }
+                            }
+                        }
 
                         builder.setView(dialogView)
                         val dialog = builder.create()
@@ -138,6 +367,40 @@ class HomeActivity : AppCompatActivity() {
                                 .load(user.foto_profile)
                                 .transform(CenterCrop(), RoundedCorners(10000))
                                 .into(imageEdit)
+                        }
+
+                        homeViewModel.getListStatus().observe(this@HomeActivity) { status ->
+                            if (status != null) {
+                                when (status) {
+                                    is Result.Loading -> {
+                                        isLoadingProfile.visibility = View.VISIBLE
+                                    }
+
+                                    is Result.Success -> {
+                                        status.data.forEach {
+                                            if (it.id == user.status) {
+                                                statusUser.text = it.status
+                                                if (it.status == "Pending") {
+                                                    statusUser.setTextColor(getColor(R.color.white))
+                                                    statusUser.setBackgroundColor(getColor(R.color.pendingColor))
+                                                } else if (it.status == "Unapproved") {
+                                                    statusUser.setTextColor(getColor(R.color.white))
+                                                    statusUser.setBackgroundColor(getColor(R.color.unapprovedColor))
+                                                } else if (it.status == "Approved") {
+                                                    statusUser.setTextColor(getColor(R.color.white))
+                                                    statusUser.setBackgroundColor(getColor(R.color.approvedColor))
+                                                }
+                                            }
+                                        }
+                                        isLoadingProfile.visibility = View.GONE
+                                    }
+
+                                    is Result.Error -> {
+                                        showToast(status.error)
+                                        isLoadingProfile.visibility = View.GONE
+                                    }
+                                }
+                            }
                         }
 
                         usernameEdit.text = user.nama
@@ -162,7 +425,7 @@ class HomeActivity : AppCompatActivity() {
                                             if (result != null) {
                                                 when (result) {
                                                     is Result.Loading -> {
-                                                        loadingView.visibility = View.VISIBLE
+                                                        isLoadingProfile.visibility = View.VISIBLE
                                                     }
 
                                                     is Result.Success -> {
@@ -183,7 +446,8 @@ class HomeActivity : AppCompatActivity() {
                                                                             foto_profile = save.data.fotoProfile,
                                                                             role = save.data.role,
                                                                             status = save.data.status,
-                                                                            isLogin = true
+                                                                            isLogin = true,
+                                                                            document = save.data.supportDocument
                                                                         ))
 
                                                                         Glide.with(this@HomeActivity)
@@ -203,12 +467,12 @@ class HomeActivity : AppCompatActivity() {
                                                             }
                                                         }
 
-                                                        loadingView.visibility = View.GONE
+                                                        isLoadingProfile.visibility = View.GONE
                                                     }
 
                                                     is Result.Error -> {
                                                         showToast(result.error)
-                                                        loadingView.visibility = View.GONE
+                                                        isLoadingProfile.visibility = View.GONE
                                                     }
                                                 }
                                             }
@@ -232,7 +496,7 @@ class HomeActivity : AppCompatActivity() {
 
                         usernameEdit.setOnClickListener {
                             val builderConfirm = AlertDialog.Builder(this@HomeActivity)
-                            builderConfirm.setTitle("Input Username")
+                            builderConfirm.setTitle("Input New Full Name")
 
                             val input = EditText(this@HomeActivity)
                             val params = LinearLayout.LayoutParams(
@@ -252,7 +516,7 @@ class HomeActivity : AppCompatActivity() {
                                         if (result != null) {
                                             when (result) {
                                                 is Result.Loading -> {
-                                                    loadingView.visibility = View.VISIBLE
+                                                    isLoadingProfile.visibility = View.VISIBLE
                                                 }
 
                                                 is Result.Success -> {
@@ -273,7 +537,8 @@ class HomeActivity : AppCompatActivity() {
                                                                         foto_profile = save.data.fotoProfile,
                                                                         role = save.data.role,
                                                                         status = save.data.status,
-                                                                        isLogin = true
+                                                                        isLogin = true,
+                                                                        document = save.data.supportDocument
                                                                     ))
 
                                                                     usernameEdit.text = save.data.nama
@@ -289,12 +554,12 @@ class HomeActivity : AppCompatActivity() {
                                                         }
                                                     }
 
-                                                    loadingView.visibility = View.GONE
+                                                    isLoadingProfile.visibility = View.GONE
                                                 }
 
                                                 is Result.Error -> {
                                                     showToast(result.error)
-                                                    loadingView.visibility = View.GONE
+                                                    isLoadingProfile.visibility = View.GONE
                                                 }
                                             }
                                         }
@@ -318,14 +583,13 @@ class HomeActivity : AppCompatActivity() {
                             homeViewModel.logoutUser()
                             dialog.dismiss()
                             val intent = Intent(this@HomeActivity, LoginActivity::class.java)
-                            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
+                            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
                             startActivity(intent)
-                            finish()
                         }
                     }
                 } else {
                     val intentMain = Intent(this@HomeActivity, LoginActivity::class.java)
-                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
+                    intentMain.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
                     startActivity(intentMain)
                     finish()
                 }
@@ -349,7 +613,17 @@ class HomeActivity : AppCompatActivity() {
                             binding.rvGamelanBaliHome.addItemDecoration(CustomItemDecoration(spacingInPixels, false))
                             binding.rvGamelanBaliHome.adapter = adapter
 
-                            adapter.setListGamelan(result.data)
+                            dataSetApproved.clear()
+                            if (fullShowOrNot) {
+                                result.data.forEach {
+                                    if (it.status == "67618fc3cc4fa7bc6c0bdbbf") {
+                                        dataSetApproved.add(it)
+                                    }
+                                }
+                                adapter.setListGamelan(dataSetApproved)
+                            } else {
+                                adapter.setListGamelan(result.data)
+                            }
                         }
 
                         is Result.Error -> {
@@ -382,7 +656,18 @@ class HomeActivity : AppCompatActivity() {
                             binding.rvInstrumenHome.layoutManager = GridLayoutManager(this@HomeActivity, 2)
                             binding.rvInstrumenHome.setHasFixedSize(true)
                             binding.rvInstrumenHome.adapter = adapterInstrument
-                            adapterInstrument.setListInstrument(result.data.take(4))
+
+                            dataSetApprovedInstrument.clear()
+                            if (fullShowOrNot) {
+                                result.data.forEach {
+                                    if (it.status == "67618fc3cc4fa7bc6c0bdbbf") {
+                                        dataSetApprovedInstrument.add(it)
+                                    }
+                                }
+                                adapterInstrument.setListInstrument(dataSetApprovedInstrument.take(4))
+                            } else {
+                                adapterInstrument.setListInstrument(result.data.take(4))
+                            }
                         }
 
                         is Result.Error -> {
@@ -410,7 +695,18 @@ class HomeActivity : AppCompatActivity() {
                             val spacingInPixels = resources.getDimensionPixelSize(R.dimen.spacing_32dp)
                             binding.rvSanggarHome.addItemDecoration(CustomItemDecoration(spacingInPixels, false))
                             binding.rvSanggarHome.adapter = adapterSanggar
-                            adapterSanggar.setListSanggar(result.data)
+
+                            dataSetApprovedSanggar.clear()
+                            if (fullShowOrNot) {
+                                result.data.forEach {
+                                    if (it.status == "67618fc3cc4fa7bc6c0bdbbf") {
+                                        dataSetApprovedSanggar.add(it)
+                                    }
+                                }
+                                adapterSanggar.setListSanggar(dataSetApprovedSanggar)
+                            } else {
+                                adapterSanggar.setListSanggar(result.data)
+                            }
                         }
 
                         is Result.Error -> {
@@ -442,13 +738,31 @@ class HomeActivity : AppCompatActivity() {
                                     binding.rvInstrumenHome.layoutManager = GridLayoutManager(this@HomeActivity, 2)
                                     binding.rvInstrumenHome.setHasFixedSize(true)
                                     binding.rvInstrumenHome.adapter = adapterInstrument
-                                    adapterInstrument.setListInstrument(result.data.instrumentData)
 
                                     adapter = HomeAdapter(this@HomeActivity)
                                     binding.rvGamelanBaliHome.layoutManager = LinearLayoutManager(this@HomeActivity,  LinearLayoutManager.HORIZONTAL, false)
                                     binding.rvGamelanBaliHome.setHasFixedSize(true)
                                     binding.rvGamelanBaliHome.adapter = adapter
-                                    adapter.setListGamelan(result.data.gamelanData)
+
+                                    dataSetApproved.clear()
+                                    dataSetApprovedInstrument.clear()
+                                    if (fullShowOrNot) {
+                                        result.data.gamelanData.forEach {
+                                            if (it.status == "67618fc3cc4fa7bc6c0bdbbf") {
+                                                dataSetApproved.add(it)
+                                            }
+                                        }
+                                        result.data.instrumentData.forEach { instrumentStatus ->
+                                            if (instrumentStatus.status == "67618fc3cc4fa7bc6c0bdbbf") {
+                                                dataSetApprovedInstrument.add(instrumentStatus)
+                                            }
+                                        }
+                                        adapter.setListGamelan(dataSetApproved)
+                                        adapterInstrument.setListInstrument(dataSetApprovedInstrument)
+                                    } else {
+                                        adapter.setListGamelan(result.data.gamelanData)
+                                        adapterInstrument.setListInstrument(result.data.instrumentData)
+                                    }
                                 }
 
                                 is Result.Error -> {
@@ -461,14 +775,8 @@ class HomeActivity : AppCompatActivity() {
                     Log.d("IsiSearchView", binding.searchViewGamelan.text.toString())
                     false
                 }
-        }
 
-        binding.scrolling.setOnRefreshListener {
-            lifecycleScope.launch {
-                homeViewModel = withContext(Dispatchers.IO) {
-                    ViewModelFactory.getInstance(this@HomeActivity).create(HomeViewModel::class.java)
-                }
-
+            binding.scrolling.setOnRefreshListener {
                 homeViewModel.getSessionUser().observe(this@HomeActivity) { user ->
                     if (user.isLogin) {
                         binding.usernameTv.text = user.nama
@@ -478,6 +786,39 @@ class HomeActivity : AppCompatActivity() {
                                 .load(user.foto_profile)
                                 .transform(CenterCrop(), RoundedCorners(10000))
                                 .into(binding.profileImage)
+                        }
+
+                        homeViewModel.getUserDatabyId(user.user_id).observe(this@HomeActivity) { save ->
+                            if (save != null) {
+                                when (save) {
+                                    is Result.Loading -> {
+                                        isLoading(false)
+                                    }
+
+                                    is Result.Success -> {
+                                        if (save.data.status != user.status) {
+                                            homeViewModel.saveSession(UserModel(
+                                                nama = save.data.nama,
+                                                access_token = user.access_token,
+                                                email = save.data.email,
+                                                user_id = save.data.id,
+                                                foto_profile = save.data.fotoProfile,
+                                                role = save.data.role,
+                                                status = save.data.status,
+                                                isLogin = true,
+                                                document = save.data.supportDocument
+                                            ))
+                                            showToast("Status Updated")
+                                            isLoading(false)
+                                        }
+                                    }
+
+                                    is Result.Error -> {
+                                        showToast(save.error)
+                                        isLoading(false)
+                                    }
+                                }
+                            }
                         }
                     } else {
                         val intentMain = Intent(this@HomeActivity, LoginActivity::class.java)
@@ -502,7 +843,18 @@ class HomeActivity : AppCompatActivity() {
                                 binding.rvGamelanBaliHome.layoutManager = LinearLayoutManager(this@HomeActivity,  LinearLayoutManager.HORIZONTAL, false)
                                 binding.rvGamelanBaliHome.setHasFixedSize(true)
                                 binding.rvGamelanBaliHome.adapter = adapter
-                                adapter.setListGamelan(result.data)
+
+                                dataSetApproved.clear()
+                                if (fullShowOrNot) {
+                                    result.data.forEach {
+                                        if (it.status == "67618fc3cc4fa7bc6c0bdbbf") {
+                                            dataSetApproved.add(it)
+                                        }
+                                    }
+                                    adapter.setListGamelan(dataSetApproved)
+                                } else {
+                                    adapter.setListGamelan(result.data)
+                                }
                             }
 
                             is Result.Error -> {
@@ -535,7 +887,18 @@ class HomeActivity : AppCompatActivity() {
                                 binding.rvInstrumenHome.layoutManager = GridLayoutManager(this@HomeActivity, 2)
                                 binding.rvInstrumenHome.setHasFixedSize(true)
                                 binding.rvInstrumenHome.adapter = adapterInstrument
-                                adapterInstrument.setListInstrument(result.data.take(4))
+
+                                dataSetApprovedInstrument.clear()
+                                if (fullShowOrNot) {
+                                    result.data.forEach {
+                                        if (it.status == "67618fc3cc4fa7bc6c0bdbbf") {
+                                            dataSetApprovedInstrument.add(it)
+                                        }
+                                    }
+                                    adapterInstrument.setListInstrument(dataSetApprovedInstrument.take(4))
+                                } else {
+                                    adapterInstrument.setListInstrument(result.data.take(4))
+                                }
                             }
 
                             is Result.Error -> {
@@ -561,7 +924,18 @@ class HomeActivity : AppCompatActivity() {
                                 binding.rvSanggarHome.layoutManager = LinearLayoutManager(this@HomeActivity,  LinearLayoutManager.HORIZONTAL, false)
                                 binding.rvSanggarHome.setHasFixedSize(true)
                                 binding.rvSanggarHome.adapter = adapterSanggar
-                                adapterSanggar.setListSanggar(result.data)
+
+                                dataSetApprovedSanggar.clear()
+                                if (fullShowOrNot) {
+                                    result.data.forEach {
+                                        if (it.status == "67618fc3cc4fa7bc6c0bdbbf") {
+                                            dataSetApprovedSanggar.add(it)
+                                        }
+                                    }
+                                    adapterSanggar.setListSanggar(dataSetApprovedSanggar)
+                                } else {
+                                    adapterSanggar.setListSanggar(result.data)
+                                }
                             }
 
                             is Result.Error -> {
@@ -571,8 +945,9 @@ class HomeActivity : AppCompatActivity() {
                         }
                     }
                 }
+
+                binding.scrolling.isRefreshing = false
             }
-            binding.scrolling.isRefreshing = false
         }
 
         supportActionBar?.hide()
@@ -629,6 +1004,59 @@ class HomeActivity : AppCompatActivity() {
             }
         }
         return file
+    }
+
+    override fun repeatFunction() {
+        lifecycleScope.launch {
+            homeViewModel = withContext(Dispatchers.IO) {
+                ViewModelFactory.getInstance(this@HomeActivity).create(HomeViewModel::class.java)
+            }
+            homeViewModel.getSessionUser().observe(this@HomeActivity) { user ->
+                if (user.isLogin) {
+                    binding.usernameTv.text = user.nama
+
+                    if (user.foto_profile != "none") {
+                        Glide.with(this@HomeActivity)
+                            .load(user.foto_profile)
+                            .transform(CenterCrop(), RoundedCorners(10000))
+                            .into(binding.profileImage)
+                    }
+
+                    homeViewModel.getUserDatabyId(user.user_id).observe(this@HomeActivity) { save ->
+                        if (save != null) {
+                            when (save) {
+                                is Result.Loading -> { }
+
+                                is Result.Success -> {
+                                    if (save.data.status != user.status) {
+                                        homeViewModel.saveSession(UserModel(
+                                            nama = save.data.nama,
+                                            access_token = user.access_token,
+                                            email = save.data.email,
+                                            user_id = save.data.id,
+                                            foto_profile = save.data.fotoProfile,
+                                            role = save.data.role,
+                                            status = save.data.status,
+                                            isLogin = true,
+                                            document = save.data.supportDocument
+                                        ))
+                                    }
+                                }
+
+                                is Result.Error -> {
+                                    showToast(save.error)
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    val intentMain = Intent(this@HomeActivity, LoginActivity::class.java)
+                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
+                    startActivity(intentMain)
+                    finish()
+                }
+            }
+        }
     }
 
     private fun showToast(message: String) {

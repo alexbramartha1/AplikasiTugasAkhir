@@ -11,21 +11,27 @@ import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.ProgressBar
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.android.material.bottomsheet.BottomSheetDialog
+import com.google.android.material.button.MaterialButton
 import com.reviling.filamentandroid.R
 import com.reviling.filamentandroid.ViewModelFactory
 import com.reviling.filamentandroid.data.Result
 import com.reviling.filamentandroid.data.preferences.StatePlayer
+import com.reviling.filamentandroid.data.preferences.UserModel
 import com.reviling.filamentandroid.databinding.ActivityDetailGamelanBinding
+import com.reviling.filamentandroid.ui.BaseActivity
 import com.reviling.filamentandroid.ui.CustomItemDecoration
 import com.reviling.filamentandroid.ui.adapter.AudioAdapter
 import com.reviling.filamentandroid.ui.adapter.HomeAdapter
@@ -42,7 +48,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.IOException
 
-class DetailGamelanActivity : AppCompatActivity() {
+class DetailGamelanActivity : BaseActivity() {
 
     private lateinit var binding: ActivityDetailGamelanBinding
     private lateinit var detailGamelanViewModel: DetailGamelanViewModel
@@ -52,8 +58,9 @@ class DetailGamelanActivity : AppCompatActivity() {
     private lateinit var instrumentAdapter: InstrumentAdapter
     private var flagsBtnShow: Int = 0
     private lateinit var isLoadingBar: ProgressBar
+    private var statusDetail: String? = null
 
-    @SuppressLint("NotifyDataSetChanged")
+    @SuppressLint("NotifyDataSetChanged", "InflateParams")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityDetailGamelanBinding.inflate(layoutInflater)
@@ -74,6 +81,18 @@ class DetailGamelanActivity : AppCompatActivity() {
                 ViewModelFactory.getInstance(this@DetailGamelanActivity).create(DetailGamelanViewModel::class.java)
             }
 
+            detailGamelanViewModel.getSessionUser().observe(this@DetailGamelanActivity) { user ->
+                if (user.isLogin) {
+                    if (user.role == "67619109cc4fa7bc6c0bdbc8" && user.status == "67618fc3cc4fa7bc6c0bdbbf") {
+                        binding.showEverythingCard.visibility = View.VISIBLE
+                        binding.statusBtn.visibility = View.VISIBLE
+                    } else {
+                        binding.showEverythingCard.visibility = View.GONE
+                        binding.statusBtn.visibility = View.GONE
+                    }
+                }
+            }
+
             binding.showEverything.setOnClickListener {
                 if (flagsBtnShow == 0) {
                     flagsBtnShow = 1
@@ -86,6 +105,50 @@ class DetailGamelanActivity : AppCompatActivity() {
                 }
             }
 
+            binding.statusBtn.setOnClickListener {
+                val dialog = layoutInflater.inflate(R.layout.status_fragment, null)
+                val builder = BottomSheetDialog(this@DetailGamelanActivity)
+                val descriptionStatus: TextView = dialog.findViewById(R.id.status_description)
+                val statusApproval: MaterialButton = dialog.findViewById(R.id.status_approval)
+                isLoadingBar = dialog.findViewById(R.id.progress_bar_dialog_ask)
+
+                builder.setContentView(dialog)
+                builder.show()
+
+                detailGamelanViewModel.getNoteData(idGamelan).observe(this@DetailGamelanActivity) { result ->
+                    if (result != null) {
+                        when (result) {
+                            is Result.Loading -> {
+                                isLoadingBar.visibility = View.VISIBLE
+                            }
+
+                            is Result.Success -> {
+                                descriptionStatus.visibility = View.VISIBLE
+                                descriptionStatus.text = result.data.note
+                                statusApproval.text = statusDetail
+
+                                if (statusDetail == "Pending") {
+                                    statusApproval.setTextColor(getColor(R.color.white))
+                                    statusApproval.setBackgroundColor(getColor(R.color.pendingColor))
+                                } else if (statusDetail == "Unapproved") {
+                                    statusApproval.setTextColor(getColor(R.color.white))
+                                    statusApproval.setBackgroundColor(getColor(R.color.unapprovedColor))
+                                } else if (statusDetail == "Approved") {
+                                    statusApproval.setTextColor(getColor(R.color.white))
+                                    statusApproval.setBackgroundColor(getColor(R.color.approvedColor))
+                                }
+                                isLoadingBar.visibility = View.GONE
+                            }
+
+                            is Result.Error -> {
+                                showToast(result.error)
+                                isLoadingBar.visibility = View.GONE
+                            }
+                        }
+                    }
+                }
+            }
+
             detailGamelanViewModel.geDetailGamelanInstrument(idGamelan).observe(this@DetailGamelanActivity) { result ->
                 if (result != null) {
                     when (result) {
@@ -94,8 +157,46 @@ class DetailGamelanActivity : AppCompatActivity() {
                         }
 
                         is Result.Success -> {
-                            showToast("Data Loaded")
-                            isLoading(false)
+                            detailGamelanViewModel.getListStatus().observe(this@DetailGamelanActivity) { status ->
+                                if (status != null) {
+                                    when (status) {
+                                        is Result.Loading -> {
+                                            isLoading(true)
+                                        }
+
+                                        is Result.Success -> {
+                                            val statusGamelan = result.data.gamelanData[0].status
+
+                                            status.data.forEach {
+                                                if (it.id == statusGamelan) {
+                                                    binding.statusBtn.text = it.status
+                                                    statusDetail = it.status
+
+                                                    if (it.status == "Pending") {
+                                                        binding.statusBtn.setTextColor(getColor(R.color.white))
+                                                        binding.statusBtn.setBackgroundColor(getColor(R.color.pendingColor))
+                                                    } else if (it.status == "Unapproved") {
+                                                        binding.statusBtn.setTextColor(getColor(R.color.white))
+                                                        binding.statusBtn.setBackgroundColor(getColor(R.color.unapprovedColor))
+                                                    } else if (it.status == "Approved") {
+                                                        binding.statusBtn.setTextColor(getColor(R.color.white))
+                                                        binding.statusBtn.setBackgroundColor(getColor(R.color.approvedColor))
+                                                    }
+                                                }
+                                            }
+
+                                            showToast("Data Loaded")
+                                            isLoading(false)
+                                        }
+
+                                        is Result.Error -> {
+                                            showToast(status.error)
+                                            isLoading(false)
+                                        }
+                                    }
+                                }
+                            }
+
                             Log.d("ISIDATA", result.data.toString())
                             binding.gamelanName.text = result.data.gamelanData[0].namaGamelan
                             binding.gamelanDesc.text = result.data.gamelanData[0].description
@@ -201,6 +302,8 @@ class DetailGamelanActivity : AppCompatActivity() {
                             binding.rvInstrumenHome.setHasFixedSize(true)
                             binding.rvInstrumenHome.adapter = instrumentAdapter
                             instrumentAdapter.setListInstrument(result.data.instrumentData)
+                            showToast("Data Loaded")
+                            isLoading(false)
                         }
 
                         is Result.Error -> {
@@ -223,8 +326,45 @@ class DetailGamelanActivity : AppCompatActivity() {
                         }
 
                         is Result.Success -> {
-                            showToast("Data Loaded")
-                            isLoading(false)
+                            detailGamelanViewModel.getListStatus().observe(this@DetailGamelanActivity) { status ->
+                                if (status != null) {
+                                    when (status) {
+                                        is Result.Loading -> {
+                                            isLoading(true)
+                                        }
+
+                                        is Result.Success -> {
+                                            val statusSanggar = result.data.gamelanData[0].status
+
+                                            status.data?.forEach {
+                                                if (it?.id == statusSanggar) {
+                                                    binding.statusBtn.text = it.status
+
+                                                    if (it.status == "Pending") {
+                                                        binding.statusBtn.setTextColor(getColor(R.color.white))
+                                                        binding.statusBtn.setBackgroundColor(getColor(R.color.pendingColor))
+                                                    } else if (it.status == "Unapproved") {
+                                                        binding.statusBtn.setTextColor(getColor(R.color.white))
+                                                        binding.statusBtn.setBackgroundColor(getColor(R.color.unapprovedColor))
+                                                    } else if (it.status == "Approved") {
+                                                        binding.statusBtn.setTextColor(getColor(R.color.white))
+                                                        binding.statusBtn.setBackgroundColor(getColor(R.color.approvedColor))
+                                                    }
+                                                }
+                                            }
+
+                                            showToast("Data Loaded")
+                                            isLoading(false)
+                                        }
+
+                                        is Result.Error -> {
+                                            showToast(status.error)
+                                            isLoading(false)
+                                        }
+                                    }
+                                }
+                            }
+
                             Log.d("ISIDATA", result.data.toString())
                             binding.gamelanName.text = result.data.gamelanData[0].namaGamelan
                             binding.gamelanDesc.text = result.data.gamelanData[0].description
@@ -262,6 +402,8 @@ class DetailGamelanActivity : AppCompatActivity() {
                             binding.rvInstrumenHome.setHasFixedSize(true)
                             binding.rvInstrumenHome.adapter = instrumentAdapter
                             instrumentAdapter.setListInstrument(result.data.instrumentData)
+                            showToast("Data Loaded")
+                            isLoading(false)
                         }
 
                         is Result.Error -> {
@@ -278,6 +420,58 @@ class DetailGamelanActivity : AppCompatActivity() {
 
         supportActionBar?.hide()
     }
+
+    override fun repeatFunction() {
+        lifecycleScope.launch {
+            detailGamelanViewModel = withContext(Dispatchers.IO) {
+                ViewModelFactory.getInstance(this@DetailGamelanActivity)
+                    .create(DetailGamelanViewModel::class.java)
+            }
+
+            detailGamelanViewModel.getSessionUser().observe(this@DetailGamelanActivity) { user ->
+                if (user.isLogin) {
+                    detailGamelanViewModel.getUserDatabyId(user.user_id)
+                        .observe(this@DetailGamelanActivity) { save ->
+                            if (save != null) {
+                                when (save) {
+                                    is Result.Loading -> {}
+
+                                    is Result.Success -> {
+                                        if (save.data.status != user.status) {
+                                            detailGamelanViewModel.saveSession(
+                                                UserModel(
+                                                    nama = save.data.nama,
+                                                    access_token = user.access_token,
+                                                    email = save.data.email,
+                                                    user_id = save.data.id,
+                                                    foto_profile = save.data.fotoProfile,
+                                                    role = save.data.role,
+                                                    status = save.data.status,
+                                                    isLogin = true,
+                                                    document = save.data.supportDocument
+                                                )
+                                            )
+                                            if (user.role == "67619109cc4fa7bc6c0bdbc8" && user.status == "67618fc3cc4fa7bc6c0bdbbf") {
+                                                binding.showEverythingCard.visibility = View.VISIBLE
+                                                binding.statusBtn.visibility = View.VISIBLE
+                                            } else {
+                                                binding.showEverythingCard.visibility = View.GONE
+                                                binding.statusBtn.visibility = View.GONE
+                                            }
+                                        }
+                                    }
+
+                                    is Result.Error -> {
+                                        showToast(save.error)
+                                    }
+                                }
+                            }
+                        }
+                }
+            }
+        }
+    }
+
 
     private fun showToast(message: String) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show()

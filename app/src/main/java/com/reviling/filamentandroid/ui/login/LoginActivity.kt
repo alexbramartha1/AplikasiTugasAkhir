@@ -82,7 +82,7 @@ class LoginActivity : AppCompatActivity() {
                                 isLoading(false)
 
                                 val intentMain = Intent(this, HomeActivity::class.java)
-                                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
+                                intentMain.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
                                 startActivity(intentMain)
                                 finish()
                             }
@@ -99,9 +99,7 @@ class LoginActivity : AppCompatActivity() {
 
         binding.goToRegister.setOnClickListener {
             val intentRegister = Intent(this, RegisterActivity::class.java)
-            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
             startActivity(intentRegister)
-            finish()
         }
 
         supportActionBar?.hide()
@@ -118,6 +116,6 @@ class LoginActivity : AppCompatActivity() {
     @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
         super.onBackPressed()
-        finish()
+        finishAffinity()
     }
 }

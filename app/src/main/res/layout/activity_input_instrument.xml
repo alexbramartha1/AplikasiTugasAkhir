@@ -71,7 +71,11 @@
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/figtree_regular"
                     android:hint="@string/fungsi_instrument"
-                    android:maxLines="2" />
+                    android:imeOptions="actionDone"
+                    android:inputType="textMultiLine"
+                    android:scrollHorizontally="false"
+                    android:overScrollMode="always"
+                    android:scrollbars="vertical" />
 
             </com.google.android.material.textfield.TextInputLayout>
 
