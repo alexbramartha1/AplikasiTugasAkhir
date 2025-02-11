@@ -120,8 +120,9 @@ class InputAudioInstrumentActivity : AppCompatActivity() {
 
             binding.upload.setOnClickListener {
                 val intent = Intent(this@InputAudioInstrumentActivity, DetailSeeAllInstrumentActivity::class.java)
-                intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
+                intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
                 startActivity(intent)
+                finish()
             }
 
             binding.inputAudio.setOnClickListener {
@@ -329,14 +330,6 @@ class InputAudioInstrumentActivity : AppCompatActivity() {
             }
         }
         return file
-    }
-
-    @Deprecated("Deprecated in Java")
-    override fun onBackPressed() {
-        super.onBackPressed()
-        val intent = Intent(this@InputAudioInstrumentActivity, DetailSeeAllInstrumentActivity::class.java)
-        intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
-        startActivity(intent)
     }
 
     companion object {

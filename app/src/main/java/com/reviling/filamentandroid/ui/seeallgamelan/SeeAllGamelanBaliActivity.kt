@@ -100,6 +100,13 @@ class SeeAllGamelanBaliActivity : BaseActivity() {
                         params.topMargin = resources.getDimensionPixelSize(R.dimen.spacing_15dp)
                         binding.searchBarGamelan.layoutParams = params
                         binding.searchBarGamelan.requestLayout()
+                    } else if (user.role == "676190fdcc4fa7bc6c0bdbc6" && user.status == "67618fc3cc4fa7bc6c0bdbbf") {
+                        binding.addDataGamelan.visibility = View.GONE
+                        binding.searchBarGamelan.inflateMenu(R.menu.menu)
+                        binding.scrollButton.visibility = View.GONE
+                        params.topMargin = resources.getDimensionPixelSize(R.dimen.spacing_15dp)
+                        binding.searchBarGamelan.layoutParams = params
+                        binding.searchBarGamelan.requestLayout()
                     } else {
                         binding.searchBarGamelan.menu.clear()
                         binding.scrollButton.visibility = View.VISIBLE

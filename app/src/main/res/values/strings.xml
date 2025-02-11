@@ -36,6 +36,7 @@
     <string name="sanggar_gamelan_bali">Sanggar Gamelan Bali</string>
     <string name="error_message_connection">Kesalahan koneksi, cek koneksimu!</string>
     <string name="cannot_empty">Tidak boleh kosong!</string>
+    <string name="pilih_status_approval">Pilih status approval!</string>
     <string name="image_cannot_empty">Gambar sanggar harus diisi!</string>
     <string name="format_phone">Format: +6287714504894</string>
     <string name="material_cannot_empty">Mohon isi Material!</string>
@@ -140,4 +141,10 @@
     <string name="upload_bukti_kepemilikan">Upload Bukti Kepemilikan</string>
     <string name="sertifikat">Lihat Sertifikat</string>
     <string name="lihat_dokumen">Dokumen</string>
+    <string name="edit_approval">Edit Approval</string>
+    <string name="update_approval">Update Approval</string>
+    <string name="ubah">Ubah</string>
+    <string name="general_users">General Users</string>
+    <string name="ahli_gamelan">Ahli Gamelan</string>
+    <string name="search_users">Search Users</string>
 </resources>

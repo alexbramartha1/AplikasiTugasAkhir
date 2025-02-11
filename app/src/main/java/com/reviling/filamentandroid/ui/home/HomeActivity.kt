@@ -62,6 +62,7 @@ import com.reviling.filamentandroid.ui.login.LoginViewModel
 import com.reviling.filamentandroid.ui.seeallgamelan.SeeAllGamelanBaliActivity
 import com.reviling.filamentandroid.ui.seeallinstrument.DetailSeeAllInstrumentActivity
 import com.reviling.filamentandroid.ui.seeallsanggar.SeeAllSanggarActivity
+import com.reviling.filamentandroid.ui.seeallusers.AllUsersActivity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -172,9 +173,18 @@ class HomeActivity : BaseActivity() {
                 startActivity(intent)
             }
 
+            binding.showEverything.setOnClickListener {
+                val intent = Intent(this@HomeActivity, AllUsersActivity::class.java)
+                startActivity(intent)
+            }
+
             homeViewModel.getSessionUser().observe(this@HomeActivity) { user ->
                 if (user.isLogin) {
                     binding.usernameTv.text = user.nama
+
+                    if (user.role == "676190fdcc4fa7bc6c0bdbc6") {
+                        binding.showEverythingCard.visibility = View.VISIBLE
+                    }
 
                     if (user.foto_profile != "none") {
                         Glide.with(this@HomeActivity)

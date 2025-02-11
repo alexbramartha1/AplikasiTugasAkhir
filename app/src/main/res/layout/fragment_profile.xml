@@ -172,8 +172,8 @@
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/refreshBtn"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
             android:layout_marginBottom="7dp"
             android:drawableRight="@drawable/info_icon"
             android:backgroundTint="@android:color/transparent"

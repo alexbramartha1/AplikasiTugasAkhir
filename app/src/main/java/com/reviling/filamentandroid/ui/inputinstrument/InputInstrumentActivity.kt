@@ -426,11 +426,13 @@ class InputInstrumentActivity : AppCompatActivity() {
                                             this@InputInstrumentActivity,
                                             InputAudioInstrumentActivity::class.java
                                         )
+                                        intentBack.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
                                         intentBack.putExtra(
                                             InputAudioInstrumentActivity.ID,
                                             result.data
                                         )
                                         startActivity(intentBack)
+                                        finish()
                                     }
 
                                     is Result.Error -> {
@@ -501,11 +503,13 @@ class InputInstrumentActivity : AppCompatActivity() {
                                         this@InputInstrumentActivity,
                                         InputAudioInstrumentActivity::class.java
                                     )
+                                    intentBack.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
                                     intentBack.putExtra(
                                         InputAudioInstrumentActivity.ID,
                                         idInstrument
                                     )
                                     startActivity(intentBack)
+                                    finish()
                                 }
 
                                 is Result.Error -> {

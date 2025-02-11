@@ -137,6 +137,9 @@ class DetailSeeAllInstrumentActivity : BaseActivity() {
                     if (user.role == "67619109cc4fa7bc6c0bdbc8" && user.status == "67618fc3cc4fa7bc6c0bdbbf") {
                         binding.addDataInstrument.visibility = View.VISIBLE
                         binding.searchBarInstrument.inflateMenu(R.menu.menu)
+                    } else if (user.role == "676190fdcc4fa7bc6c0bdbc6" && user.status == "67618fc3cc4fa7bc6c0bdbbf") {
+                        binding.addDataInstrument.visibility = View.GONE
+                        binding.searchBarInstrument.inflateMenu(R.menu.menu)
                     } else {
                         binding.searchBarInstrument.menu.clear()
                         binding.addDataInstrument.visibility = View.GONE
@@ -146,7 +149,6 @@ class DetailSeeAllInstrumentActivity : BaseActivity() {
 
             var selectedItemStatus: MutableList<Int> = mutableListOf()
 
-            binding.searchBarInstrument.inflateMenu(R.menu.menu)
             binding.searchBarInstrument.setOnMenuItemClickListener { menuItem ->
                 when (menuItem.itemId) {
                     R.id.action_filter -> {

@@ -31,7 +31,7 @@ class CustomViewer {
 
     private lateinit var choreographer: Choreographer
     lateinit var modelViewer: ModelViewer
-    lateinit var buffer: ByteBuffer
+    var buffer: ByteBuffer? = null
 
     fun loadEntity() {
         choreographer = Choreographer.getInstance()
@@ -72,7 +72,7 @@ class CustomViewer {
         try {
             buffer = fetchGlbFromUrl(url)
             modelViewer.apply {
-                loadModelGlb(buffer)
+                loadModelGlb(buffer!!)
                 transformToUnitCube()
             }
         } catch (e: Exception) {

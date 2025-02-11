@@ -24,6 +24,7 @@ import com.reviling.filamentandroid.data.response.AudioArrayGamelanItem
 import com.reviling.filamentandroid.data.response.AudioArrayItem
 import com.reviling.filamentandroid.data.response.AudioGamelanItem
 import com.reviling.filamentandroid.data.response.AudioInstrumenItem
+import com.reviling.filamentandroid.data.response.DataUserItem
 import com.reviling.filamentandroid.data.response.GamelanDataItem
 import com.reviling.filamentandroid.data.response.InstrumentDataItem
 import com.reviling.filamentandroid.data.response.SanggarDataItem
@@ -37,6 +38,7 @@ import com.reviling.filamentandroid.databinding.MaterialListCardInputBinding
 import com.reviling.filamentandroid.databinding.SanggarBaliCardBinding
 import com.reviling.filamentandroid.databinding.SanggarSeeAllCardBinding
 import com.reviling.filamentandroid.databinding.SeeAllGamelanBinding
+import com.reviling.filamentandroid.databinding.UsersCardBinding
 import com.reviling.filamentandroid.ui.detailgamelan.DetailGamelanActivity
 import com.reviling.filamentandroid.ui.detailinstrument.DetailInstrumentActivity
 import com.reviling.filamentandroid.ui.detailsanggar.DetailSanggarActivity
@@ -725,6 +727,50 @@ class InputAudioGamelanAdapter(private val context: Context, private val onItems
     class MyViewHolder(val binding: AudioListInputBinding, private val context: Context): RecyclerView.ViewHolder (binding.root) {
         fun bind(audio: AudioArrayGamelanItem) {
             binding.audioName.text = audio.audioName
+        }
+    }
+}
+
+class AllUsersAdapter(private val context: Context, private val onItemClicked: (String) -> Unit): RecyclerView.Adapter<AllUsersAdapter.MyViewHolder>() {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MyViewHolder {
+        val binding = UsersCardBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        return MyViewHolder(binding, context)
+    }
+
+    override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
+        holder.bind(listUsers[position])
+
+        holder.itemView.setOnClickListener {
+            onItemClicked(listUsers[position].id)
+        }
+    }
+
+    override fun getItemCount(): Int {
+        return listUsers.size
+    }
+
+    private val listUsers = ArrayList<DataUserItem>()
+
+    fun setListUsers(listUsersData: List<DataUserItem>) {
+        val diffCallback = AllUsersDataDiffCallback(this.listUsers, listUsersData)
+        val diffResult = DiffUtil.calculateDiff(diffCallback)
+        this.listUsers.clear()
+        this.listUsers.addAll(listUsersData)
+        diffResult.dispatchUpdatesTo(this)
+        Log.d("IsiSDariListUsers", listUsers.toString())
+    }
+
+    class MyViewHolder(val binding: UsersCardBinding, val context: Context): RecyclerView.ViewHolder (binding.root) {
+        fun bind(user: DataUserItem) {
+            binding.fullNameUsers.text = user.nama
+            binding.emailUsers.text = user.email
+
+            if (user.fotoProfile != "none") {
+                Glide.with(binding.root)
+                    .load(user.fotoProfile)
+                    .transform(CenterCrop(), RoundedCorners(100))
+                    .into(binding.profileImageAdmin)
+            }
         }
     }
 }

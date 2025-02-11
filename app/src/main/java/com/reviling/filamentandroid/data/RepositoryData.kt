@@ -42,6 +42,122 @@ class RepositoryData private constructor(
     private val userPreferences: UserPreferences
 ){
 
+    fun updateApprovalInstrument(id: String, note: String, statusId: String) = liveData {
+        emit(Result.Loading)
+
+        val noteRequestBody = note.toRequestBody("text/plain".toMediaType())
+        val status = statusId.toRequestBody("text/plain".toMediaType())
+
+        try {
+            val user = runBlocking { userPreferences.getSession().first() }
+            val successResponse = ApiConfig.getApiService(user.access_token)
+                .updateApprovalInstrument(
+                    id,
+                    noteRequestBody,
+                    status
+                )
+
+            emit(Result.Success(successResponse))
+        } catch (e: HttpException) {
+            val errorBody = e.response()?.errorBody()?.string()
+            Log.e("HttpException", "Error: ${e.message}, Code: ${e.code()}, Body: $errorBody")
+            emit(Result.Error("Sorry, ${errorBody ?: "Unknown HTTP error"}"))
+        } catch (e: IOException) {
+            Log.e("IOException", "Network Error: ${e.message}")
+            emit(Result.Error("Network error: ${e.localizedMessage}"))
+        } catch (e: Exception) {
+            Log.e("Exception", "Unexpected Error: ${e.message}")
+            emit(Result.Error(e.localizedMessage ?: "Unknown error occurred"))
+        }
+    }
+
+    fun updateApprovalSanggar(id: String, note: String, statusId: String) = liveData {
+        emit(Result.Loading)
+
+        val noteRequestBody = note.toRequestBody("text/plain".toMediaType())
+        val status = statusId.toRequestBody("text/plain".toMediaType())
+
+        try {
+            val user = runBlocking { userPreferences.getSession().first() }
+            val successResponse = ApiConfig.getApiService(user.access_token)
+                .updateApprovalSanggar(
+                    id,
+                    noteRequestBody,
+                    status
+                )
+
+            emit(Result.Success(successResponse))
+        } catch (e: HttpException) {
+            val errorBody = e.response()?.errorBody()?.string()
+            Log.e("HttpException", "Error: ${e.message}, Code: ${e.code()}, Body: $errorBody")
+            emit(Result.Error("Sorry, ${errorBody ?: "Unknown HTTP error"}"))
+        } catch (e: IOException) {
+            Log.e("IOException", "Network Error: ${e.message}")
+            emit(Result.Error("Network error: ${e.localizedMessage}"))
+        } catch (e: Exception) {
+            Log.e("Exception", "Unexpected Error: ${e.message}")
+            emit(Result.Error(e.localizedMessage ?: "Unknown error occurred"))
+        }
+    }
+
+    fun updateApprovalGamelan(id: String, note: String, statusId: String) = liveData {
+        emit(Result.Loading)
+
+        val noteRequestBody = note.toRequestBody("text/plain".toMediaType())
+        val status = statusId.toRequestBody("text/plain".toMediaType())
+
+        try {
+            val user = runBlocking { userPreferences.getSession().first() }
+            val successResponse = ApiConfig.getApiService(user.access_token)
+                .updateApprovalGamelan(
+                    id,
+                    noteRequestBody,
+                    status
+                )
+
+            emit(Result.Success(successResponse))
+        } catch (e: HttpException) {
+            val errorBody = e.response()?.errorBody()?.string()
+            Log.e("HttpException", "Error: ${e.message}, Code: ${e.code()}, Body: $errorBody")
+            emit(Result.Error("Sorry, ${errorBody ?: "Unknown HTTP error"}"))
+        } catch (e: IOException) {
+            Log.e("IOException", "Network Error: ${e.message}")
+            emit(Result.Error("Network error: ${e.localizedMessage}"))
+        } catch (e: Exception) {
+            Log.e("Exception", "Unexpected Error: ${e.message}")
+            emit(Result.Error(e.localizedMessage ?: "Unknown error occurred"))
+        }
+    }
+
+    fun updateApprovalUsers(id: String, note: String, statusId: String) = liveData {
+        emit(Result.Loading)
+
+        val noteRequestBody = note.toRequestBody("text/plain".toMediaType())
+        val status = statusId.toRequestBody("text/plain".toMediaType())
+
+        try {
+            val user = runBlocking { userPreferences.getSession().first() }
+            val successResponse = ApiConfig.getApiService(user.access_token)
+                .updateApprovalUsers(
+                    id,
+                    noteRequestBody,
+                    status
+                )
+
+            emit(Result.Success(successResponse))
+        } catch (e: HttpException) {
+            val errorBody = e.response()?.errorBody()?.string()
+            Log.e("HttpException", "Error: ${e.message}, Code: ${e.code()}, Body: $errorBody")
+            emit(Result.Error("Sorry, ${errorBody ?: "Unknown HTTP error"}"))
+        } catch (e: IOException) {
+            Log.e("IOException", "Network Error: ${e.message}")
+            emit(Result.Error("Network error: ${e.localizedMessage}"))
+        } catch (e: Exception) {
+            Log.e("Exception", "Unexpected Error: ${e.message}")
+            emit(Result.Error(e.localizedMessage ?: "Unknown error occurred"))
+        }
+    }
+
     fun createAudioInstrumentData(
         instrumentId: String,
         namaAudio: String,
@@ -614,6 +730,59 @@ class RepositoryData private constructor(
         }
     }
 
+    fun getUsersByFilter(idRole: List<String>, idStatus: List<String>) = liveData {
+        emit(Result.Loading)
+
+        val requestBodyRole = idRole.let { oke -> oke.forEach { it.toRequestBody("text/plain".toMediaType()) } }
+        Log.d("IsiDariRequestBodyRole", requestBodyRole.toString())
+
+        try {
+            val user = runBlocking { userPreferences.getSession().first() }
+            val successResponse = ApiConfig.getApiService(user.access_token).getAllUsersByFilter(idRole, idStatus)
+            emit(Result.Success(successResponse))
+        } catch (e: HttpException) {
+            val errorBody = e.response()?.errorBody()?.string()
+            var dataError: String? = null
+            if (errorBody != null) {
+                val jsonObject = JsonParser.parseString(errorBody).asJsonObject
+                dataError = jsonObject["detail"].asString
+            }
+            Log.e("HttpException", "Error: ${e.message}, Code: ${e.code()}, Body: $errorBody")
+            emit(Result.Error("Sorry, ${dataError ?: "Unknown HTTP error"}"))
+        } catch (e: IOException) {
+            Log.e("IOException", "Network Error: ${e.message}")
+            emit(Result.Error("Network error: ${e.localizedMessage}"))
+        } catch (e: Exception) {
+            Log.e("Exception", "Unexpected Error: ${e.message}")
+            emit(Result.Error(e.localizedMessage ?: "Unknown error occurred"))
+        }
+    }
+
+    fun deleteUserById(idUser: String) = liveData {
+        emit(Result.Loading)
+
+        try {
+            val user = runBlocking { userPreferences.getSession().first() }
+            val successResponse = ApiConfig.getApiService(user.access_token).deleteUserById(idUser)
+            emit(Result.Success(successResponse))
+        } catch (e: HttpException) {
+            val errorBody = e.response()?.errorBody()?.string()
+            var dataError: String? = null
+            if (errorBody != null) {
+                val jsonObject = JsonParser.parseString(errorBody).asJsonObject
+                dataError = jsonObject["detail"].asString
+            }
+            Log.e("HttpException", "Error: ${e.message}, Code: ${e.code()}, Body: $errorBody")
+            emit(Result.Error("Sorry, ${dataError ?: "Unknown HTTP error"}"))
+        } catch (e: IOException) {
+            Log.e("IOException", "Network Error: ${e.message}")
+            emit(Result.Error("Network error: ${e.localizedMessage}"))
+        } catch (e: Exception) {
+            Log.e("Exception", "Unexpected Error: ${e.message}")
+            emit(Result.Error(e.localizedMessage ?: "Unknown error occurred"))
+        }
+    }
+
     fun getNoteData(id: String) = liveData {
         emit(Result.Loading)
 
@@ -638,7 +807,6 @@ class RepositoryData private constructor(
             emit(Result.Error(e.localizedMessage ?: "Unknown error occurred"))
         }
     }
-
 
     fun fetchAudioInstrumentById(id: String) = liveData {
         emit(Result.Loading)
@@ -1263,6 +1431,58 @@ class RepositoryData private constructor(
         try {
             val user = runBlocking { userPreferences.getSession().first() }
             val successResponse = ApiConfig.getApiService(user.access_token).getUserById(idUser)
+
+            emit(Result.Success(successResponse))
+        } catch (e: HttpException) {
+            val errorBody = e.response()?.errorBody()?.string()
+            var dataError: String? = null
+            if (errorBody != null) {
+                val jsonBody = JsonParser.parseString(errorBody).asJsonObject
+                dataError = jsonBody["detail"].asString
+            }
+            Log.e("HttpException", "Error: ${e.message}, Code: ${e.code()}, Body: $errorBody")
+            emit(Result.Error("Sorry, ${dataError ?: "Unknown HTTP error"}"))
+        } catch (e: IOException) {
+            Log.e("IOException", "Network Error: ${e.message}")
+            emit(Result.Error("Network error: ${e.localizedMessage}"))
+        } catch (e: Exception) {
+            Log.e("Exception", "Unexpected Error: ${e.message}")
+            emit(Result.Error(e.localizedMessage ?: "Unknown error occurred"))
+        }
+    }
+
+    fun getUsersByName(nameUser: String) = liveData {
+        emit(Result.Loading)
+
+        try {
+            val user = runBlocking { userPreferences.getSession().first() }
+            val successResponse = ApiConfig.getApiService(user.access_token).getUsersByName(nameUser)
+
+            emit(Result.Success(successResponse))
+        } catch (e: HttpException) {
+            val errorBody = e.response()?.errorBody()?.string()
+            var dataError: String? = null
+            if (errorBody != null) {
+                val jsonBody = JsonParser.parseString(errorBody).asJsonObject
+                dataError = jsonBody["detail"].asString
+            }
+            Log.e("HttpException", "Error: ${e.message}, Code: ${e.code()}, Body: $errorBody")
+            emit(Result.Error("Sorry, ${dataError ?: "Unknown HTTP error"}"))
+        } catch (e: IOException) {
+            Log.e("IOException", "Network Error: ${e.message}")
+            emit(Result.Error("Network error: ${e.localizedMessage}"))
+        } catch (e: Exception) {
+            Log.e("Exception", "Unexpected Error: ${e.message}")
+            emit(Result.Error(e.localizedMessage ?: "Unknown error occurred"))
+        }
+    }
+
+    fun getAllUsersData() = liveData {
+        emit(Result.Loading)
+
+        try {
+            val user = runBlocking { userPreferences.getSession().first() }
+            val successResponse = ApiConfig.getApiService(user.access_token).getAllUsersData()
 
             emit(Result.Success(successResponse))
         } catch (e: HttpException) {

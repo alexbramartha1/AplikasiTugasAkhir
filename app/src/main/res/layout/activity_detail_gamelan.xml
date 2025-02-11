@@ -320,6 +320,7 @@
         android:drawableLeft="@drawable/info_icon"
         android:backgroundTint="@color/colorPrimary"
         android:text="@string/status"
+        android:visibility="gone"
         android:textColor="@color/colorPrimaryDark"
         app:cornerRadius="4dp"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -334,6 +335,7 @@
         android:backgroundTint="#F2B38B"
         app:cardCornerRadius="50dp"
         app:cardElevation="15dp"
+        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 

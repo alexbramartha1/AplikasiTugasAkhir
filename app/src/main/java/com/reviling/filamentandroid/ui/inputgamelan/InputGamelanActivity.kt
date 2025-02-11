@@ -381,6 +381,7 @@ class InputGamelanActivity : AppCompatActivity() {
                                             this@InputGamelanActivity,
                                             InputAudioGamelanActivity::class.java
                                         )
+                                        intentBack.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
                                         intentBack.putExtra(
                                             InputAudioGamelanActivity.IDGAMELAN,
                                             result.data
@@ -440,6 +441,7 @@ class InputGamelanActivity : AppCompatActivity() {
                                         this@InputGamelanActivity,
                                         InputAudioGamelanActivity::class.java
                                     )
+                                    intentBack.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
                                     intentBack.putExtra(
                                         InputAudioGamelanActivity.IDGAMELAN,
                                         idGamelan

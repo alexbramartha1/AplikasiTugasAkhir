@@ -24,4 +24,6 @@ class DetailInstrumentViewModel(private val repository: RepositoryData): ViewMod
             repository.saveSession(userModel)
         }
     }
+
+    fun updateApprovalInstrument(id: String, note: String, statusId: String) = repository.updateApprovalInstrument(id, note, statusId)
 }

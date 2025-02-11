@@ -48,6 +48,8 @@ class MainActivity : AppCompatActivity() {
 
         downloadButton = findViewById(R.id.saveButton)
         deleteButton = findViewById(R.id.deleteButton)
+        downloadButton.isEnabled = false
+        deleteButton.isEnabled = false
 
         val imageView: ImageView = findViewById(R.id.image_ketuk)
 
@@ -82,7 +84,7 @@ class MainActivity : AppCompatActivity() {
                             isLoading(true)
                             loadGlbFromUrl(this@MainActivity, dataUrl, modelViewer)
                             this@MainActivity.openFileOutput("${dataId}.glb", Context.MODE_PRIVATE).use {
-                                it.write(buffer.toByteString().toByteArray())
+                                it.write(buffer?.toByteString()?.toByteArray())
                                 deleteButton.isEnabled = true
                                 downloadButton.isEnabled = false
                             }
@@ -91,7 +93,7 @@ class MainActivity : AppCompatActivity() {
                     } else {
                         isLoading(true)
                         this@MainActivity.openFileOutput("${dataId}.glb", Context.MODE_PRIVATE).use {
-                            it.write(buffer.toByteString().toByteArray())
+                            it.write(buffer?.toByteString()?.toByteArray())
                             deleteButton.isEnabled = true
                             downloadButton.isEnabled = false
                         }

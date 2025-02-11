@@ -40,6 +40,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginStart="23dp"
                         android:layout_marginTop="20dp"
+                        android:visibility="gone"
                         android:drawableLeft="@drawable/info_icon"
                         android:backgroundTint="@color/colorPrimary"
                         android:text="@string/status"
@@ -440,6 +441,7 @@
                 android:backgroundTint="#F2B38B"
                 app:cardCornerRadius="50dp"
                 app:cardElevation="15dp"
+                android:visibility="gone"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent">
 

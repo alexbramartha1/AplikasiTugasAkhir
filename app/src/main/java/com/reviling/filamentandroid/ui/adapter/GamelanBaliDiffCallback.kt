@@ -5,6 +5,7 @@ import com.reviling.filamentandroid.data.response.AudioArrayGamelanItem
 import com.reviling.filamentandroid.data.response.AudioArrayItem
 import com.reviling.filamentandroid.data.response.AudioGamelanItem
 import com.reviling.filamentandroid.data.response.AudioInstrumenItem
+import com.reviling.filamentandroid.data.response.DataUserItem
 import com.reviling.filamentandroid.data.response.GamelanDataItem
 import com.reviling.filamentandroid.data.response.InstrumentDataItem
 import com.reviling.filamentandroid.data.response.SanggarDataItem
@@ -111,6 +112,21 @@ class materialInputDiffCallback(private val oldGamelanList: List<String>, privat
         val oldData = oldGamelanList[oldItemPosition]
         val newData = newGamelanList[newItemPosition]
         return oldData == newData && oldData == newData
+    }
+}
+
+class AllUsersDataDiffCallback(private val oldUsersList: List<DataUserItem>, private val newUsersList: List<DataUserItem>): DiffUtil.Callback() {
+    override fun getOldListSize(): Int = oldUsersList.size
+    override fun getNewListSize(): Int = newUsersList.size
+
+    override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+        return oldUsersList[oldItemPosition] == newUsersList[newItemPosition]
+    }
+
+    override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+        val oldData = oldUsersList[oldItemPosition]
+        val newData = newUsersList[newItemPosition]
+        return oldData.id == newData.id && oldData.nama == newData.nama
     }
 }
 

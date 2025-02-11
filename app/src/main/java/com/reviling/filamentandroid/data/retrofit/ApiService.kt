@@ -1,6 +1,7 @@
 package com.reviling.filamentandroid.data.retrofit
 
 import com.reviling.filamentandroid.data.database.Pengguna
+import com.reviling.filamentandroid.data.response.AllusersResponse
 import com.reviling.filamentandroid.data.response.CreateAudioInstrumentResponse
 import com.reviling.filamentandroid.data.response.CreateDataSanggarResponse
 import com.reviling.filamentandroid.data.response.CreateGamelanResponse
@@ -357,4 +358,56 @@ interface ApiService {
     suspend fun getNoteData(
         @Path("id") id: String
     ): NoteAdminResponse
+
+    @Multipart
+    @PUT("api/gamelandata/approval/{id}")
+    suspend fun updateApprovalGamelan(
+        @Path("id") id: String,
+        @Part("note") note: RequestBody,
+        @Part("status") status: RequestBody
+    ): String
+
+    @Multipart
+    @PUT("api/userdata/approval/{id}")
+    suspend fun updateApprovalUsers(
+        @Path("id") id: String,
+        @Part("note") note: RequestBody,
+        @Part("status") status: RequestBody
+    ): String
+
+    @Multipart
+    @PUT("api/instrumendata/approval/{id}")
+    suspend fun updateApprovalInstrument(
+        @Path("id") id: String,
+        @Part("note") note: RequestBody,
+        @Part("status") status: RequestBody
+    ): String
+
+    @Multipart
+    @PUT("api/sanggardata/approval/{id}")
+    suspend fun updateApprovalSanggar(
+        @Path("id") id: String,
+        @Part("note") note: RequestBody,
+        @Part("status") status: RequestBody
+    ): String
+
+    @GET("api/userdata/getalluser")
+    suspend fun getAllUsersData(): AllusersResponse
+
+    @GET("api/userdata/getallbyname/{name}")
+    suspend fun getUsersByName(
+        @Path("name") nameUsers: String
+    ): AllusersResponse
+
+    @Multipart
+    @POST("api/userdata/fetchbyfilter")
+    suspend fun getAllUsersByFilter(
+        @Part("roleId") roleId: List<String>,
+        @Part("statusId") statusId: List<String>
+    ): AllusersResponse
+
+    @DELETE("api/userdata/deleteuser/{id}")
+    suspend fun deleteUserById(
+        @Path("id") idUser: String
+    ): String
 }

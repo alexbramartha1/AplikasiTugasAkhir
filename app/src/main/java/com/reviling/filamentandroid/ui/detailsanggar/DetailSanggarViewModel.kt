@@ -16,4 +16,5 @@ class DetailSanggarViewModel(private val repositoryData: RepositoryData): ViewMo
     fun getNoteData(id: String) = repositoryData.getNoteData(id)
     fun getListStatus() = repositoryData.getListStatus()
     fun getGamelanByIdList(idList: MutableList<String>) = repositoryData.getGamelanByIdList(idList)
+    fun updateApprovalSanggar(id: String, note: String, statusId: String) = repositoryData.updateApprovalSanggar(id, note, statusId)
 }

@@ -23,4 +23,5 @@ class DetailGamelanViewModel(private val repository: RepositoryData): ViewModel(
             repository.saveSession(userModel)
         }
     }
+    fun updateApprovalGamelan(id: String, note: String, statusId: String) = repository.updateApprovalGamelan(id, note, statusId)
 }

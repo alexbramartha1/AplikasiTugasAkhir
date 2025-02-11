@@ -18,6 +18,7 @@ import com.reviling.filamentandroid.ui.regsiter.RegisterViewModel
 import com.reviling.filamentandroid.ui.seeallgamelan.SeeAllGamelanViewModel
 import com.reviling.filamentandroid.ui.seeallinstrument.SeeAllInstrumentViewModel
 import com.reviling.filamentandroid.ui.seeallsanggar.SeeAllSanggarViewModel
+import com.reviling.filamentandroid.ui.seeallusers.AllUsersViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -54,6 +55,8 @@ class ViewModelFactory private constructor(
             return InputInstrumentViewModel(repositoryData) as T
         } else if (modelClass.isAssignableFrom(InputGamelanViewModel::class.java)) {
             return InputGamelanViewModel(repositoryData) as T
+        } else if (modelClass.isAssignableFrom(AllUsersViewModel::class.java)) {
+            return AllUsersViewModel(repositoryData) as T
         }
 
         throw IllegalArgumentException("Unknown ViewModel Class: " + modelClass.name)
