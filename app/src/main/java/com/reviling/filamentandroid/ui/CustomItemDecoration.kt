@@ -98,10 +98,19 @@ class CustomItemDecorationVerticalDouble(
         val itemCount = state.itemCount
         Log.d("IsidariItemCount", itemCount.toString())
         // Tambahkan margin kanan hanya untuk item terakhir
-        if (position == itemCount - 1 || position == itemCount - 2) {
-            outRect.bottom = marginRight  // atau nilai margin yang sesuai
+
+        if (itemCount % 2 == 0) {
+            if (position == itemCount - 1 || position == itemCount - 2) {
+                outRect.bottom = marginRight  // atau nilai margin yang sesuai
+            } else {
+                outRect.bottom = 0 // Tidak ada margin untuk item lainnya
+            }
         } else {
-            outRect.bottom = 0 // Tidak ada margin untuk item lainnya
+            if (position == itemCount - 1) {
+                outRect.bottom = marginRight  // atau nilai margin yang sesuai
+            } else {
+                outRect.bottom = 0 // Tidak ada margin untuk item lainnya
+            }
         }
     }
 }

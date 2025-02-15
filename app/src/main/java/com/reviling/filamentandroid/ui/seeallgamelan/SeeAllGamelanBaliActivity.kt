@@ -389,8 +389,6 @@ class SeeAllGamelanBaliActivity : BaseActivity() {
 
                         adapter = GamelanAdapter(this@SeeAllGamelanBaliActivity)
                         binding.rvGamelanBaliHome.layoutManager = LinearLayoutManager(this@SeeAllGamelanBaliActivity,  LinearLayoutManager.VERTICAL, false)
-                        val spacingInPixels = resources.getDimensionPixelSize(R.dimen.spacing_32dp)
-                        binding.rvGamelanBaliHome.addItemDecoration(CustomItemDecorationVertical(spacingInPixels, false))
                         binding.rvGamelanBaliHome.setHasFixedSize(true)
                         binding.rvGamelanBaliHome.adapter = adapter
 
@@ -430,8 +428,6 @@ class SeeAllGamelanBaliActivity : BaseActivity() {
 
                         adapter = GamelanAdapter(this@SeeAllGamelanBaliActivity)
                         binding.rvGamelanBaliHome.layoutManager = LinearLayoutManager(this@SeeAllGamelanBaliActivity,  LinearLayoutManager.VERTICAL, false)
-                        val spacingInPixels = resources.getDimensionPixelSize(R.dimen.spacing_32dp)
-                        binding.rvGamelanBaliHome.addItemDecoration(CustomItemDecorationVertical(spacingInPixels, false))
                         binding.rvGamelanBaliHome.setHasFixedSize(true)
                         binding.rvGamelanBaliHome.adapter = adapter
 
@@ -487,8 +483,6 @@ class SeeAllGamelanBaliActivity : BaseActivity() {
 
                             adapter = GamelanAdapter(this@SeeAllGamelanBaliActivity)
                             binding.rvGamelanBaliHome.layoutManager = LinearLayoutManager(this@SeeAllGamelanBaliActivity,  LinearLayoutManager.VERTICAL, false)
-                            val spacingInPixels = resources.getDimensionPixelSize(R.dimen.spacing_32dp)
-                            binding.rvGamelanBaliHome.addItemDecoration(CustomItemDecorationVertical(spacingInPixels, false))
                             binding.rvGamelanBaliHome.setHasFixedSize(true)
                             binding.rvGamelanBaliHome.adapter = adapter
 
@@ -600,7 +594,7 @@ class SeeAllGamelanBaliActivity : BaseActivity() {
                                                     )
                                                 )
                                                 binding.searchBarGamelan.menu.clear()
-                                                if (user.role == "67619109cc4fa7bc6c0bdbc8" && user.status == "67618fc3cc4fa7bc6c0bdbbf") {
+                                                if (save.data.role == "67619109cc4fa7bc6c0bdbc8" && save.data.status == "67618fc3cc4fa7bc6c0bdbbf") {
                                                     binding.addDataGamelan.visibility = View.VISIBLE
                                                     binding.searchBarGamelan.inflateMenu(R.menu.menu)
                                                     binding.scrollButton.visibility = View.GONE
@@ -618,6 +612,14 @@ class SeeAllGamelanBaliActivity : BaseActivity() {
 
                                         is Result.Error -> {
                                             showToast(save.error)
+                                            Log.d("IsiDariSaveError", save.error)
+                                            if (save.error == "Sorry, There is no user with this name ${user.user_id}" || save.error == "Sorry, Token has expired, please login again!" || save.error == "Sorry, Token Invalid!") {
+                                                seeAllGamelanViewModel.logoutUser()
+                                                val intentMain = Intent(this@SeeAllGamelanBaliActivity, LoginActivity::class.java)
+                                                intentMain.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
+                                                startActivity(intentMain)
+                                                finish()
+                                            }
                                         }
                                     }
                                 }

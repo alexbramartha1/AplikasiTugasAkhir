@@ -40,6 +40,7 @@ import com.reviling.filamentandroid.ui.adapter.AudioInstrumentAdapter
 import com.reviling.filamentandroid.ui.adapter.GamelanAdapter
 import com.reviling.filamentandroid.ui.adapter.MaterialAdapter
 import com.reviling.filamentandroid.ui.inputinstrument.InputInstrumentActivity
+import com.reviling.filamentandroid.ui.login.LoginActivity
 import com.reviling.filamentandroid.ui.seeallinstrument.DetailSeeAllInstrumentActivity
 import com.reviling.filamentandroid.ui.seeallsanggar.SeeAllSanggarActivity
 import kotlinx.coroutines.Dispatchers
@@ -741,6 +742,7 @@ class DetailInstrumentActivity : BaseActivity() {
                     DetailInstrumentViewModel::class.java
                 )
             }
+
             detailInstrumentViewModel.getSessionUser()
                 .observe(this@DetailInstrumentActivity) { user ->
                     if (user.isLogin) {
@@ -765,7 +767,8 @@ class DetailInstrumentActivity : BaseActivity() {
                                                         document = save.data.supportDocument
                                                     )
                                                 )
-                                                if (user.role == "67619109cc4fa7bc6c0bdbc8" && user.status == "67618fc3cc4fa7bc6c0bdbbf") {
+
+                                                if (save.data.role == "67619109cc4fa7bc6c0bdbc8" && save.data.status == "67618fc3cc4fa7bc6c0bdbbf") {
                                                     binding.showEverythingCard.visibility =
                                                         View.VISIBLE
                                                     binding.statusBtn.visibility = View.VISIBLE
@@ -779,6 +782,14 @@ class DetailInstrumentActivity : BaseActivity() {
 
                                         is Result.Error -> {
                                             showToast(save.error)
+                                            Log.d("IsiDariSaveError", save.error)
+                                            if (save.error == "Sorry, There is no user with this name ${user.user_id}" || save.error == "Sorry, Token has expired, please login again!" || save.error == "Sorry, Token Invalid!") {
+                                                detailInstrumentViewModel.logoutUser()
+                                                val intentMain = Intent(this@DetailInstrumentActivity, LoginActivity::class.java)
+                                                intentMain.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
+                                                startActivity(intentMain)
+                                                finish()
+                                            }
                                         }
                                     }
                                 }

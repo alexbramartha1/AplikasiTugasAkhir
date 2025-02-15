@@ -147,4 +147,11 @@
     <string name="general_users">General Users</string>
     <string name="ahli_gamelan">Ahli Gamelan</string>
     <string name="search_users">Search Users</string>
+    <string name="users">Users</string>
+    <string name="total_users">Total Users</string>
+    <string name="pengguna">Pengguna</string>
+    <string name="ahli_gamelan_bali">Ahli Gamelan Bali</string>
+    <string name="admin">Admin</string>
+    <string name="users_list">Users List</string>
+    <string name="year">Year</string>
 </resources>

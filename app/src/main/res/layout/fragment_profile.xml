@@ -175,7 +175,7 @@
             android:layout_width="60dp"
             android:layout_height="60dp"
             android:layout_marginBottom="7dp"
-            android:drawableRight="@drawable/info_icon"
+            android:drawableRight="@drawable/refresh_icon"
             android:backgroundTint="@android:color/transparent"
             app:cornerRadius="10dp"
             app:layout_constraintBottom_toBottomOf="@+id/status"

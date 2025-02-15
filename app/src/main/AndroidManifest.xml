@@ -26,6 +26,9 @@
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true">
         <activity
+            android:name=".ui.seeallusers.UsersBasedActivity"
+            android:exported="false" />
+        <activity
             android:name=".ui.seeallusers.AllUsersActivity"
             android:exported="false" />
         <activity

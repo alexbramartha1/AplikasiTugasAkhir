@@ -12,10 +12,12 @@ import android.provider.DocumentsContract
 import android.util.Log
 import android.view.View
 import android.view.inputmethod.EditorInfo
+import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.ListView
 import android.widget.ProgressBar
 import android.widget.SearchView
 import android.widget.TextView
@@ -38,8 +40,10 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.CenterCrop
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.search.SearchBar
+import com.google.android.material.textfield.TextInputEditText
 import com.reviling.filamentandroid.R
 import com.reviling.filamentandroid.ViewModelFactory
 import com.reviling.filamentandroid.data.RepositoryData
@@ -63,6 +67,7 @@ import com.reviling.filamentandroid.ui.seeallgamelan.SeeAllGamelanBaliActivity
 import com.reviling.filamentandroid.ui.seeallinstrument.DetailSeeAllInstrumentActivity
 import com.reviling.filamentandroid.ui.seeallsanggar.SeeAllSanggarActivity
 import com.reviling.filamentandroid.ui.seeallusers.AllUsersActivity
+import com.reviling.filamentandroid.ui.seeallusers.UsersBasedActivity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -92,6 +97,8 @@ class HomeActivity : BaseActivity() {
     private var dataSetApproved: MutableList<GamelanDataItem> = mutableListOf()
     private var dataSetApprovedInstrument: MutableList<InstrumentDataItem> = mutableListOf()
     private var dataSetApprovedSanggar: MutableList<SanggarDataItem> = mutableListOf()
+    private var flags: Boolean = true
+    private var statusDetail: String? = null
 
     private val getFile = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
         if (it.resultCode == Activity.RESULT_OK) {
@@ -153,6 +160,18 @@ class HomeActivity : BaseActivity() {
             insets
         }
 
+        binding.showEverything.setOnClickListener {
+            if (flags) {
+                binding.users.visibility = View.VISIBLE
+
+                flags = false
+            } else {
+                binding.users.visibility = View.GONE
+
+                flags = true
+            }
+        }
+
         lifecycleScope.launch {
             homeViewModel = withContext(Dispatchers.IO) {
                 ViewModelFactory.getInstance(this@HomeActivity).create(HomeViewModel::class.java)
@@ -173,8 +192,8 @@ class HomeActivity : BaseActivity() {
                 startActivity(intent)
             }
 
-            binding.showEverything.setOnClickListener {
-                val intent = Intent(this@HomeActivity, AllUsersActivity::class.java)
+            binding.users.setOnClickListener {
+                val intent = Intent(this@HomeActivity, UsersBasedActivity::class.java)
                 startActivity(intent)
             }
 
@@ -263,6 +282,52 @@ class HomeActivity : BaseActivity() {
                             buttonUpdateDoc.visibility = View.GONE
                         }
 
+                        statusUser.setOnClickListener {
+                            val dialog = layoutInflater.inflate(R.layout.status_fragment, null)
+                            val builderStatusDetail = BottomSheetDialog(this@HomeActivity)
+                            val descriptionStatus: TextView = dialog.findViewById(R.id.status_description)
+                            val statusApproval: MaterialButton = dialog.findViewById(R.id.status_approval)
+                            val editApproval: MaterialButton = dialog.findViewById(R.id.editApprovalBtn)
+                            val isLoadingBar: ProgressBar = dialog.findViewById(R.id.progress_bar_dialog_ask)
+
+                            builderStatusDetail.setContentView(dialog)
+                            builderStatusDetail.show()
+
+                            homeViewModel.getNoteData(userID!!).observe(this@HomeActivity) { result ->
+                                if (result != null) {
+                                    when (result) {
+                                        is Result.Loading -> {
+                                            isLoadingBar.visibility = View.VISIBLE
+                                        }
+
+                                        is Result.Success -> {
+                                            descriptionStatus.visibility = View.VISIBLE
+                                            descriptionStatus.text = result.data.note
+                                            statusApproval.text = statusDetail
+
+                                            if (statusDetail == "Pending") {
+                                                statusApproval.setTextColor(getColor(R.color.white))
+                                                statusApproval.setBackgroundColor(getColor(R.color.pendingColor))
+                                            } else if (statusDetail == "Unapproved") {
+                                                statusApproval.setTextColor(getColor(R.color.white))
+                                                statusApproval.setBackgroundColor(getColor(R.color.unapprovedColor))
+                                            } else if (statusDetail == "Approved") {
+                                                statusApproval.setTextColor(getColor(R.color.white))
+                                                statusApproval.setBackgroundColor(getColor(R.color.approvedColor))
+                                            }
+                                            isLoadingBar.visibility = View.GONE
+                                            editApproval.isEnabled = true
+                                        }
+
+                                        is Result.Error -> {
+                                            showToast(result.error)
+                                            isLoadingBar.visibility = View.GONE
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
                         buttonViewDoc.setOnClickListener {
                             homeViewModel.getUserDatabyId(userID!!).observe(this@HomeActivity) { save ->
                                 if (save != null) {
@@ -334,7 +399,9 @@ class HomeActivity : BaseActivity() {
 
                                                         is Result.Success -> {
                                                             status.data.forEach {
-                                                                if (it.id == user.status) {
+                                                                if (it.id == save.data.status) {
+                                                                    statusUser.text = it.status
+                                                                    statusDetail = it.status
                                                                     statusUser.text = it.status
                                                                     if (it.status == "Pending") {
                                                                         statusUser.setTextColor(getColor(R.color.white))
@@ -390,6 +457,7 @@ class HomeActivity : BaseActivity() {
                                         status.data.forEach {
                                             if (it.id == user.status) {
                                                 statusUser.text = it.status
+                                                statusDetail = it.status
                                                 if (it.status == "Pending") {
                                                     statusUser.setTextColor(getColor(R.color.white))
                                                     statusUser.setBackgroundColor(getColor(R.color.pendingColor))
@@ -638,7 +706,7 @@ class HomeActivity : BaseActivity() {
 
                         is Result.Error -> {
                             showToast(result.error)
-                            if (result.error == "Sorry, {\"detail\":\"Token Invalid!\"}") {
+                            if (result.error == "Sorry, Token has expired, please login again!") {
                                 homeViewModel.logoutUser()
                                 val intentMain = Intent(this@HomeActivity, LoginActivity::class.java)
                                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
@@ -869,7 +937,7 @@ class HomeActivity : BaseActivity() {
 
                             is Result.Error -> {
                                 showToast(result.error)
-                                if (result.error == "Sorry, {\"detail\":\"Token Invalid!\"}") {
+                                if (result.error == "Sorry, Token has expired, please login again!") {
                                     homeViewModel.logoutUser()
                                     val intentMain = Intent(this@HomeActivity, LoginActivity::class.java)
                                     intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
@@ -1021,6 +1089,7 @@ class HomeActivity : BaseActivity() {
             homeViewModel = withContext(Dispatchers.IO) {
                 ViewModelFactory.getInstance(this@HomeActivity).create(HomeViewModel::class.java)
             }
+
             homeViewModel.getSessionUser().observe(this@HomeActivity) { user ->
                 if (user.isLogin) {
                     binding.usernameTv.text = user.nama
@@ -1055,6 +1124,14 @@ class HomeActivity : BaseActivity() {
 
                                 is Result.Error -> {
                                     showToast(save.error)
+                                    Log.d("IsiDariSaveError", save.error)
+                                    if (save.error == "Sorry, There is no user with this name ${user.user_id}" || save.error == "Sorry, Token has expired, please login again!" || save.error == "Sorry, Token Invalid!") {
+                                        homeViewModel.logoutUser()
+                                        val intentMain = Intent(this@HomeActivity, LoginActivity::class.java)
+                                        intentMain.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
+                                        startActivity(intentMain)
+                                        finish()
+                                    }
                                 }
                             }
                         }

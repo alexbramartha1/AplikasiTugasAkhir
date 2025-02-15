@@ -643,7 +643,7 @@ class DetailGamelanActivity : BaseActivity() {
                                                     document = save.data.supportDocument
                                                 )
                                             )
-                                            if (user.role == "67619109cc4fa7bc6c0bdbc8" && user.status == "67618fc3cc4fa7bc6c0bdbbf") {
+                                            if (save.data.role == "67619109cc4fa7bc6c0bdbc8" && save.data.status == "67618fc3cc4fa7bc6c0bdbbf") {
                                                 binding.showEverythingCard.visibility = View.VISIBLE
                                                 binding.statusBtn.visibility = View.VISIBLE
                                             } else {
@@ -655,6 +655,14 @@ class DetailGamelanActivity : BaseActivity() {
 
                                     is Result.Error -> {
                                         showToast(save.error)
+                                        Log.d("IsiDariSaveError", save.error)
+                                        if (save.error == "Sorry, There is no user with this name ${user.user_id}" || save.error == "Sorry, Token has expired, please login again!" || save.error == "Sorry, Token Invalid!") {
+                                            detailGamelanViewModel.logoutUser()
+                                            val intentMain = Intent(this@DetailGamelanActivity, LoginActivity::class.java)
+                                            intentMain.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
+                                            startActivity(intentMain)
+                                            finish()
+                                        }
                                     }
                                 }
                             }

@@ -25,4 +25,9 @@ class SeeAllGamelanViewModel(private val repositoryData: RepositoryData): ViewMo
             repositoryData.saveSession(userModel)
         }
     }
+    fun logoutUser() {
+        viewModelScope.launch {
+            repositoryData.logout()
+        }
+    }
 }

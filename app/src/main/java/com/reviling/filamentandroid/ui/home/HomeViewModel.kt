@@ -36,7 +36,7 @@ class HomeViewModel(private val repository: RepositoryData): ViewModel() {
             repository.saveSession(userModel)
         }
     }
-
+    fun getNoteData(id: String) = repository.getNoteData(id)
     fun logoutUser() {
         viewModelScope.launch {
             repository.logout()

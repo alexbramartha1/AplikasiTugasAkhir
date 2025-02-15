@@ -37,6 +37,7 @@ import com.reviling.filamentandroid.ui.CustomItemDecorationVerticalDouble
 import com.reviling.filamentandroid.ui.adapter.HomeAdapter
 import com.reviling.filamentandroid.ui.home.HomeActivity
 import com.reviling.filamentandroid.ui.inputinstrument.InputInstrumentActivity
+import com.reviling.filamentandroid.ui.login.LoginActivity
 
 class DetailSeeAllInstrumentActivity : BaseActivity() {
 
@@ -83,7 +84,7 @@ class DetailSeeAllInstrumentActivity : BaseActivity() {
                                                     )
                                                 )
                                                 binding.searchBarInstrument.menu.clear()
-                                                if (user.role == "67619109cc4fa7bc6c0bdbc8" && user.status == "67618fc3cc4fa7bc6c0bdbbf") {
+                                                if (save.data.role == "67619109cc4fa7bc6c0bdbc8" && save.data.status == "67618fc3cc4fa7bc6c0bdbbf") {
                                                     binding.addDataInstrument.visibility =
                                                         View.VISIBLE
                                                     binding.searchBarInstrument.inflateMenu(R.menu.menu)
@@ -96,6 +97,14 @@ class DetailSeeAllInstrumentActivity : BaseActivity() {
 
                                         is Result.Error -> {
                                             showToast(save.error)
+                                            Log.d("IsiDariSaveError", save.error)
+                                            if (save.error == "Sorry, There is no user with this name ${user.user_id}" || save.error == "Sorry, Token has expired, please login again!" || save.error == "Sorry, Token Invalid!") {
+                                                seeAllInstrumentViewModel.logoutUser()
+                                                val intentMain = Intent(this@DetailSeeAllInstrumentActivity, LoginActivity::class.java)
+                                                intentMain.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
+                                                startActivity(intentMain)
+                                                finish()
+                                            }
                                         }
                                     }
                                 }
@@ -241,6 +250,7 @@ class DetailSeeAllInstrumentActivity : BaseActivity() {
                             binding.rvInstrumenHome.layoutManager = GridLayoutManager(this@DetailSeeAllInstrumentActivity, 2)
                             val spacingInPixelsAbove = resources.getDimensionPixelSize(R.dimen.spacing_10dp)
                             binding.rvInstrumenHome.addItemDecoration(CustomItemDecorationAbove(spacingInPixelsAbove, false))
+                            binding.rvInstrumenHome.addItemDecoration(CustomItemDecorationVerticalDouble(spacingInPixelsAbove, false))
                             binding.rvInstrumenHome.setHasFixedSize(true)
                             binding.rvInstrumenHome.adapter = adapterInstrument
 

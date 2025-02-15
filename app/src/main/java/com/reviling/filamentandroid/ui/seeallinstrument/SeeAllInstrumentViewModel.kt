@@ -20,6 +20,11 @@ class SeeAllInstrumentViewModel(private val repositoryData: RepositoryData): Vie
             repositoryData.saveSession(userModel)
         }
     }
+    fun logoutUser() {
+        viewModelScope.launch {
+            repositoryData.logout()
+        }
+    }
     fun getListStatus() = repositoryData.getListStatus()
     fun getInstrumentByFilter(statusId: List<String>) = repositoryData.getInstrumentByFilter(statusId)
     fun getUserDatabyId(idUser: String) = repositoryData.getUserDatabyId(idUser)

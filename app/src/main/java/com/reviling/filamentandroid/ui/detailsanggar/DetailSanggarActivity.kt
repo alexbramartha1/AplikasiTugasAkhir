@@ -30,16 +30,19 @@ import com.google.android.material.textfield.TextInputEditText
 import com.reviling.filamentandroid.R
 import com.reviling.filamentandroid.ViewModelFactory
 import com.reviling.filamentandroid.data.Result
+import com.reviling.filamentandroid.data.preferences.UserModel
 import com.reviling.filamentandroid.data.response.GamelanDataItem
 import com.reviling.filamentandroid.databinding.ActivityDetailSanggarBinding
+import com.reviling.filamentandroid.ui.BaseActivity
 import com.reviling.filamentandroid.ui.adapter.GamelanAdapter
 import com.reviling.filamentandroid.ui.inputsanggar.InputDataSanggarActivity
+import com.reviling.filamentandroid.ui.login.LoginActivity
 import com.reviling.filamentandroid.ui.seeallsanggar.SeeAllSanggarActivity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class DetailSanggarActivity : AppCompatActivity() {
+class DetailSanggarActivity : BaseActivity() {
 
     private lateinit var binding: ActivityDetailSanggarBinding
     private lateinit var sanggarId: String
@@ -60,6 +63,62 @@ class DetailSanggarActivity : AppCompatActivity() {
 
     private var dataSetApproved: MutableList<GamelanDataItem> = mutableListOf()
     private var fullShowOrNot: Boolean = true
+
+    override fun repeatFunction() {
+        lifecycleScope.launch {
+            detailSanggarViewModel = withContext(Dispatchers.IO) {
+                ViewModelFactory.getInstance(this@DetailSanggarActivity).create(DetailSanggarViewModel::class.java)
+            }
+
+            detailSanggarViewModel.getSessionUser().observe(this@DetailSanggarActivity) { user ->
+                if (user.isLogin) {
+
+                    detailSanggarViewModel.getUserDatabyId(user.user_id).observe(this@DetailSanggarActivity) { save ->
+                        if (save != null) {
+                            when (save) {
+                                is Result.Loading -> { }
+
+                                is Result.Success -> {
+                                    if (save.data.status != user.status) {
+                                        detailSanggarViewModel.saveSession(
+                                            UserModel(
+                                            nama = save.data.nama,
+                                            access_token = user.access_token,
+                                            email = save.data.email,
+                                            user_id = save.data.id,
+                                            foto_profile = save.data.fotoProfile,
+                                            role = save.data.role,
+                                            status = save.data.status,
+                                            isLogin = true,
+                                            document = save.data.supportDocument
+                                        )
+                                        )
+                                    }
+                                }
+
+                                is Result.Error -> {
+                                    showToast(save.error)
+                                    Log.d("IsiDariSaveError", save.error)
+                                    if (save.error == "Sorry, There is no user with this name ${user.user_id}" || save.error == "Sorry, Token has expired, please login again!" || save.error == "Sorry, Token Invalid!") {
+                                        detailSanggarViewModel.logoutUser()
+                                        val intentMain = Intent(this@DetailSanggarActivity, LoginActivity::class.java)
+                                        intentMain.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
+                                        startActivity(intentMain)
+                                        finish()
+                                    }
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    val intentMain = Intent(this@DetailSanggarActivity, LoginActivity::class.java)
+                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
+                    startActivity(intentMain)
+                    finish()
+                }
+            }
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

@@ -23,5 +23,10 @@ class DetailGamelanViewModel(private val repository: RepositoryData): ViewModel(
             repository.saveSession(userModel)
         }
     }
+    fun logoutUser() {
+        viewModelScope.launch {
+            repository.logout()
+        }
+    }
     fun updateApprovalGamelan(id: String, note: String, statusId: String) = repository.updateApprovalGamelan(id, note, statusId)
 }

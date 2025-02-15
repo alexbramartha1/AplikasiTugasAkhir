@@ -68,6 +68,9 @@ class AllAndYourSanggarFragment : Fragment() {
     private var fullShowOrNot: Boolean = true
     private var dataSetApprovedSanggar: MutableList<SanggarDataItem> = mutableListOf()
 
+    private var userRole: String? = null
+    private var userStatus: String? = null
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -90,6 +93,8 @@ class AllAndYourSanggarFragment : Fragment() {
             seeAllSanggarViewModel.getSessionUser().observe(viewLifecycleOwner) { user ->
                 if (user.isLogin) {
                     userId = user.user_id
+                    userRole = user.role
+                    userStatus = user.status
 
                     if (user.role == "676190f1cc4fa7bc6c0bdbc4" || user.status == "67618f9ecc4fa7bc6c0bdbbb" || user.status == "67618fe3cc4fa7bc6c0bdbc1") {
                         fullShowOrNot = true
@@ -131,13 +136,18 @@ class AllAndYourSanggarFragment : Fragment() {
                             chooseKabupaten.setText(R.string.pilih_kabupaten)
                         }
 
-                        if (position == 1) {
-                            listViewStatus.visibility = View.GONE
-                            titleApproval.visibility = View.GONE
-                        } else {
-                            chooseKabupaten.visibility = View.GONE
+                        if (position == 2 || userRole == "676190fdcc4fa7bc6c0bdbc6" && userStatus == "67618fc3cc4fa7bc6c0bdbbf") {
                             listViewStatus.visibility = View.VISIBLE
                             titleApproval.visibility = View.VISIBLE
+                        } else {
+                            listViewStatus.visibility = View.GONE
+                            titleApproval.visibility = View.GONE
+                        }
+
+                        if (position == 1) {
+                            chooseKabupaten.visibility = View.VISIBLE
+                        } else {
+                            chooseKabupaten.visibility = View.GONE
                         }
 
                         chooseKabupaten.setOnClickListener {
@@ -188,7 +198,24 @@ class AllAndYourSanggarFragment : Fragment() {
                                     loadAllSanggarByFilter()
                                 }
                             } else {
+                                if (userRole == "676190fdcc4fa7bc6c0bdbc6" && userStatus == "67618fc3cc4fa7bc6c0bdbbf") {
+                                    selectedIdStatus.clear()
+                                    selectedNamaStatus.clear()
+                                    selectedItemStatus.clear()
 
+                                    for (i in 0 until listViewStatus.count) {
+                                        if (listViewStatus.isItemChecked(i)) {
+                                            selectedItemStatus.add(i)
+                                            selectedIdStatus.add(statusIdList[i])
+                                            adapterStatus.getItem(i)
+                                                ?.let { it1 -> selectedNamaStatus.add(it1) }
+                                        }
+                                    }
+
+                                    if (selectedIdStatus.isNotEmpty() || selectedKabupaten.isNotEmpty()) {
+                                        fetchAdminSanggarByFilter()
+                                    }
+                                }
                             }
 
                             dialog.dismiss()
@@ -202,6 +229,14 @@ class AllAndYourSanggarFragment : Fragment() {
                                 loadAllSanggar()
                                 dialog.dismiss()
                             } else {
+                                if (userRole == "676190fdcc4fa7bc6c0bdbc6" && userStatus == "67618fc3cc4fa7bc6c0bdbbf") {
+                                    selectedKabupaten.clear()
+                                    flagsSelectKabupaten.clear()
+                                    selectedNamaStatus.clear()
+                                    selectedIdStatus.clear()
+                                    loadAllSanggarWithoutId()
+                                    dialog.dismiss()
+                                }
                                 selectedKabupaten.clear()
                                 flagsSelectKabupaten.clear()
                                 loadAllSanggarWithoutId()
@@ -216,6 +251,20 @@ class AllAndYourSanggarFragment : Fragment() {
                                 selectedItemStatus.clear()
                                 dialog.dismiss()
                             } else {
+                                if (userRole == "676190fdcc4fa7bc6c0bdbc6" && userStatus == "67618fc3cc4fa7bc6c0bdbbf") {
+                                    selectedNamaStatus.clear()
+                                    selectedIdStatus.clear()
+                                    selectedItemStatus.clear()
+                                    selectedKabupaten.clear()
+                                    flagsSelectKabupaten.clear()
+                                    chooseKabupaten.setText(R.string.pilih_kabupaten)
+                                    sanggarAdapter = SanggarSeeAllAdapter(requireContext())
+                                    binding.rvSanggar.layoutManager = LinearLayoutManager(requireContext())
+                                    binding.rvSanggar.setHasFixedSize(true)
+                                    binding.rvSanggar.adapter = sanggarAdapter
+                                    sanggarAdapter.setListSanggarAll(dataSanggar.sanggarData)
+                                    dialog.dismiss()
+                                }
                                 selectedKabupaten.clear()
                                 flagsSelectKabupaten.clear()
                                 chooseKabupaten.setText(R.string.pilih_kabupaten)
@@ -227,7 +276,6 @@ class AllAndYourSanggarFragment : Fragment() {
                                 dialog.dismiss()
                             }
                         }
-
                         true
                     }
                     else -> false
@@ -603,7 +651,40 @@ class AllAndYourSanggarFragment : Fragment() {
             }
         }
     }
-    
+
+    private fun fetchAdminSanggarByFilter() {
+        var filteredData = listOf<SanggarDataItem>()
+        var filteredStatus = listOf<SanggarDataItem>()
+
+        if (selectedKabupaten.isNotEmpty() && selectedIdStatus.isNotEmpty()) {
+            filteredData = dataSanggar.sanggarData.filter { data ->
+                selectedKabupaten.contains(data.kabupaten)
+            }
+
+            filteredStatus = filteredData.filter {
+                selectedIdStatus.contains(it.status)
+            }
+        }
+
+        if (selectedIdStatus.isNotEmpty() && selectedKabupaten.isEmpty()) {
+            filteredStatus = dataSanggar.sanggarData.filter {
+                selectedIdStatus.contains(it.status)
+            }
+        }
+
+        if (selectedIdStatus.isEmpty() && selectedKabupaten.isNotEmpty()) {
+            filteredStatus = dataSanggar.sanggarData.filter { data ->
+                selectedKabupaten.contains(data.kabupaten)
+            }
+        }
+
+        sanggarAdapter = SanggarSeeAllAdapter(requireContext())
+        binding.rvSanggar.layoutManager = LinearLayoutManager(requireContext())
+        binding.rvSanggar.setHasFixedSize(true)
+        binding.rvSanggar.adapter = sanggarAdapter
+        sanggarAdapter.setListSanggarAll(filteredStatus)
+    }
+
     private fun dialogBuildingPickKabupaten(items: List<String>) {
 
         val dialogView = layoutInflater.inflate(R.layout.dialog_list_alamat_search, null)
